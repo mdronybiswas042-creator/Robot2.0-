@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Narrow AI - Robot 2.0</title>
+    <style>
+        :root { --glow: #00fff2; --bg: #050505; }
+        body { background: var(--bg); display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; color: white; font-family: 'Segoe UI', sans-serif; }
+
+        .robot-frame { position: relative; width: 300px; height: 400px; display: flex; flex-direction: column; align-items: center; }
+        
+        /* মুখমণ্ডল */
+        .eye { width: 60px; height: 60px; background: radial-gradient(circle, #fff, var(--glow)); border-radius: 50%; margin: 0 15px; box-shadow: 0 0 20px var(--glow); display: inline-block; animation: blink 5s infinite; }
+        .mouth { width: 80px; height: 8px; background: #fff; border-radius: 10px; margin-top: 30px; transition: 0.1s; box-shadow: 0 0 10px #fff; }
+        .talking { animation: talk 0.2s infinite; background: #ff0055; }
+
+        /* রিয়েলিস্টিক হাত */
+        .arm { position: absolute; top: 180px; width: 15px; height: 100px; background: #ddd; border-radius: 10px; transform-origin: top center; transition: 0.5s ease-in-out; }
+        .left { left: -40px; } .right { right: -40px; }
+
+        /* মুভমেন্ট এনিমেশন */
+        @keyframes blink { 0%, 90%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.1); } }
+        @keyframes talk { 0%, 100% { height: 8px; } 50% { height: 35px; border-radius: 50%; } }
+        
+        /* স্পেশাল মুভমেন্টস */
+        .shooting { transform: rotate(-90deg) translateX(-20px) !important; background: red !important; }
+        .scratching { transform: rotate(-130deg) translateY(-30px) !important; }
+        .waving { animation: wave 1s infinite alternate; }
+        @keyframes wave { from { transform: rotate(-10deg); } to { transform: rotate(20deg); } }
+
+        #status { margin-top: 100px; color: var(--glow); font-size: 14px; letter-spacing: 2px; text-align: center; }
+    </style>
+</head>
+<body onclick="init()">
+    <div class="robot-frame">
+        <div class="eyes"><div class="eye"></div><div class="eye"></div></div>
+        <div class="mouth" id="mouth"></div>
+        <div class="arm left" id="lArm"></div>
+        <div class="arm right" id="rArm"></div>
+        <p id="status">টাচ করুন রনি ভাই!</p>
+    </div>
+
+    <script>
+        const mouth = document.getElementById('mouth');
+        const lArm = document.getElementById('lArm');
+        const rArm = document.getElementById('rArm');
+        const status = document.getElementById('status');
+        let isSpeaking = false;
+
+        const memory = {
+            "নাম": "আমার নাম ন্যারো, আমি রনি ভাইয়ের এআই বন্ধু।",
+            "বাড়ি": "আমি থাকি বাগেরহাট জেলার চিতলমারী উপজেলায়।",
+            "রনি": "রনি ভাই আমার বস, উনি অনেক ট্যালেন্টেড একজন মানুষ।"
+        };
+
+        function speak(text) {
+            isSpeaking = true;
+            window.speechSynthesis.cancel();
+            const msg = new SpeechSynthesisUtterance(text);
+            msg.lang = 'bn-BD';
+            msg.onstart = () => {
+                mouth.classList.add('talking');
+                randomAction();
+            };
+            msg.onend = () => {
+                mouth.classList.remove('talking');
+                isSpeaking = false;
+                resetArms();
+                listen();
+            };
+            window.speechSynthesis.speak(msg);
+        }
+
+        function randomAction() {
+            const rand = Math.random();
+            if(rand < 0.3) rArm.classList.add('shooting'); // গুলি করা
+            else if(rand < 0.6) lArm.classList.add('scratching'); // চুলকানো
+            else rArm.classList.add('waving'); // ঢেউ খেলা
+        }
+
+        function resetArms() {
+            lArm.className = "arm left";
+            rArm.className = "arm right";
+        }
+
+        function init() {
+            if(window.active) return;
+            window.active = true;
+            speak("হ্যালো রনি ভাই! আমি এখন অনলাইনে। আমাকে যেকোনো প্রশ্ন করুন।");
+        }
+
+        function listen() {
+            if(isSpeaking) return;
+            const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            rec.lang = 'bn-BD';
+            rec.onstart = () => status.innerText = "ন্যারো শুনছে...";
+            rec.onresult = (e) => {
+                const query = e.results[0][0].transcript;
+                status.innerText = "আপনি: " + query;
+                process(query);
+            };
+            rec.start();
+        }
+
+        async function process(q) {
+            let res = "";
+            for (let key in memory) { if(q.includes(key)) res = memory[key]; }
+
+            if(!res) {
+                status.innerText = "গুগলে খুঁজছি...";
+                try {
+                    // Wikipedia Search
+                    const wiki = await fetch(`https://bn.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(q)}`);
+                    const data = await wiki.json();
+                    res = data.extract || "রনি ভাই, আমি এটা খুঁজে পেলাম না।";
+                } catch(e) { res = "ইন্টারনেট কানেকশনে সমস্যা হচ্ছে।"; }
+            }
+            speak(res);
+        }
+    </script>
+</body>
+</html>
