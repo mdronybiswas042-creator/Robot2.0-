@@ -3,163 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Narrow AI - Humanoid</title>
+    <title>Narrow AI - Humanoid Pro</title>
     <style>
-        :root { --glow: #00fff2; --danger: #ff0055; --bg: #050505; }
-        body { background: var(--bg); display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; color: white; font-family: 'Segoe UI', sans-serif; }
+        :root { --skin: #ffdbac; --glow: #00fff2; --danger: #ff0055; }
+        body { background: #0a0a0a; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; color: white; font-family: 'Segoe UI', sans-serif; }
 
-        .robot-frame { position: relative; width: 320px; height: 400px; display: flex; flex-direction: column; align-items: center; }
+        .robot-container { position: relative; width: 400px; height: 550px; display: flex; flex-direction: column; align-items: center; }
 
-        /* ফেস ও রিয়েলিস্টিক চোখ */
-        .head { transition: 0.5s; margin-bottom: 50px; }
-        .eyes { display: flex; }
-        .eye { width: 60px; height: 60px; background: radial-gradient(circle, #fff, var(--glow)); border-radius: 50%; margin: 0 15px; box-shadow: 0 0 30px var(--glow); position: relative; animation: blink 4s infinite; }
-        .eye::after { content: ''; position: absolute; width: 15px; height: 15px; background: #000; border-radius: 50%; top: 22px; left: 22px; transition: 0.2s; }
+        /* চেহারা ও চোখ */
+        .head { width: 140px; height: 160px; background: var(--skin); border-radius: 60px 60px 50px 50px; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 10; animation: lookAround 8s infinite; }
+        .eyes { display: flex; justify-content: space-around; margin-top: 50px; padding: 0 15px; }
+        .eye { width: 35px; height: 35px; background: white; border-radius: 50%; position: relative; overflow: hidden; border: 2px solid #000; }
+        .pupil { width: 18px; height: 18px; background: #000; border-radius: 50%; position: absolute; top: 25%; left: 25%; animation: eyeMove 5s infinite; }
+        .eye::before { content: ''; position: absolute; width: 100%; height: 100%; background: var(--skin); top: -100%; animation: blink 0.2s infinite 3s; z-index: 5; }
 
-        /* ইমোশন অনুযায়ী মুখ */
-        .mouth { width: 90px; height: 6px; background: #fff; border-radius: 10px; margin: 40px auto 0; box-shadow: 0 0 10px #fff; transition: 0.2s; }
-        .talking { animation: talk 0.2s infinite; background: var(--danger); box-shadow: 0 0 20px var(--danger); }
-        .thinking-mode .eye { filter: hue-rotate(100deg); transform: scale(0.9); }
+        .mouth { width: 50px; height: 4px; background: #814d4d; border-radius: 10px; margin: 35px auto 0; transition: 0.2s; }
+        .talking { animation: mouthTalk 0.2s infinite; height: 20px !important; border-radius: 50% !important; background: #5a1212 !important; }
 
-        /* বাস্তবসম্মত হাত ও আঙুল */
-        .arm { position: absolute; top: 180px; width: 14px; height: 85px; background: #ddd; border-radius: 10px; transform-origin: top center; transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .left-arm { left: -30px; transform: rotate(10deg); }
-        .right-arm { right: -30px; transform: rotate(-10deg); }
+        /* বডি ও হাত (কনুইসহ) */
+        .torso { width: 120px; height: 180px; background: #222; border-radius: 30px; margin-top: -10px; position: relative; z-index: 5; border: 2px solid #444; }
+        .pocket { width: 40px; height: 45px; border: 1px solid #555; position: absolute; bottom: 20px; right: 10px; border-radius: 5px; }
 
-        .hand { width: 32px; height: 38px; background: #fff; border-radius: 6px; position: absolute; bottom: -35px; left: -9px; display: flex; justify-content: space-around; padding: 2px; box-shadow: 0 5px 10px rgba(0,0,0,0.3); }
-        .finger { width: 5px; height: 14px; background: #eee; border-radius: 2px; transition: 0.3s; }
+        .arm { position: absolute; top: 10px; width: 20px; height: 80px; background: #333; transform-origin: top center; transition: 0.5s; }
+        .forearm { position: absolute; top: 75px; width: 100%; height: 80px; background: #444; transform-origin: top center; transition: 0.5s; display: flex; flex-direction: column; align-items: center; }
+        .hand { width: 45px; height: 45px; background: var(--skin); border-radius: 10px; position: absolute; bottom: -40px; }
+        .finger { width: 6px; height: 18px; background: var(--skin); border-bottom: 1px solid rgba(0,0,0,0.1); position: absolute; transform-origin: top; }
+        
+        .left-arm { left: -25px; transform: rotate(10deg); }
+        .right-arm { right: -25px; transform: rotate(-10deg); }
 
-        @keyframes blink { 0%, 90%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.1); } }
-        @keyframes talk { 0%, 100% { height: 6px; } 50% { height: 35px; border-radius: 50%; } }
+        /* এনিমেশনসমূহ */
+        @keyframes blink { 0%, 100% { top: -100%; } 50% { top: 0; } }
+        @keyframes mouthTalk { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(3); } }
+        @keyframes eyeMove { 0%, 100% { transform: translate(0,0); } 25% { transform: translate(5px, 5px); } 75% { transform: translate(-5px, 2px); } }
+        @keyframes lookAround { 0%, 100% { transform: rotate(0); } 30% { transform: rotate(10deg); } 60% { transform: rotate(-10deg); } }
 
-        #status { position: absolute; bottom: -60px; color: var(--glow); font-size: 14px; letter-spacing: 1px; text-shadow: 0 0 5px var(--glow); text-align: center; width: 100%; }
+        .thinking .head { animation: shake 0.5s infinite; }
+        @keyframes shake { 0% { transform: translateX(0); } 50% { transform: translateX(5px); } }
+
+        #status { margin-top: 50px; color: var(--glow); font-weight: bold; text-align: center; font-size: 18px; }
+        .btn-start { background: var(--glow); color: #000; border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; margin-top: 20px; }
     </style>
 </head>
-<body onclick="wakeUp()">
+<body>
 
-    <div class="robot-frame" id="robot">
+    <div class="robot-container" id="narrow">
         <div class="head" id="head">
             <div class="eyes">
-                <div class="eye"></div>
-                <div class="eye"></div>
+                <div class="eye"><div class="pupil"></div></div>
+                <div class="eye"><div class="pupil"></div></div>
             </div>
             <div class="mouth" id="mouth"></div>
         </div>
-
-        <div class="arm left-arm" id="lArm"><div class="hand"><div class="finger"></div><div class="finger"></div><div class="finger"></div><div class="finger"></div></div></div>
-        <div class="arm right-arm" id="rArm"><div class="hand"><div class="finger"></div><div class="finger"></div><div class="finger"></div><div class="finger"></div></div></div>
-
-        <p id="status">টাচ করলে ন্যারো কথা বলা শুরু করবে...</p>
+        <div class="torso">
+            <div class="pocket"></div>
+            <div class="arm left-arm" id="lArm">
+                <div class="forearm" id="lFore">
+                    <div class="hand" id="lHand"></div>
+                </div>
+            </div>
+            <div class="arm right-arm" id="rArm">
+                <div class="forearm" id="rFore">
+                    <div class="hand" id="rHand"></div>
+                </div>
+            </div>
+        </div>
+        <p id="status">ন্যারো আপনার অপেক্ষায়...</p>
+        <button class="btn-start" onclick="initNarrow()">ন্যারোকে জাগিয়ে তুলুন</button>
     </div>
 
     <script>
         const mouth = document.getElementById('mouth');
-        const robot = document.getElementById('robot');
         const status = document.getElementById('status');
-        const lArm = document.getElementById('lArm');
-        const rArm = document.getElementById('rArm');
+        const lArm = document.getElementById('lArm'), rArm = document.getElementById('rArm');
+        const lFore = document.getElementById('lFore'), rFore = document.getElementById('rFore');
         let isSpeaking = false;
 
         const memory = {
-            "তৈরি": "আমার প্রিয় রনি ভাই আমাকে অনেক যত্ন করে বানিয়েছেন।",
-            "বাড়ি": "রনি ভাই যেখানে থাকে, আমার বাড়িও সেখানে। অর্থাৎ বাগেরহাটের চিতলমারীতে!",
-            "নাম": "রনি ভাই আমার নাম রেখেছেন ন্যারো।",
-            "মালিক": "সৃষ্টিকর্তা আল্লাহ তাআলা সবকিছুর মালিক, তবে এই ডিজিটাল পৃথিবীতে আমি মোহাম্মদ রনি বিশ্বাসের সৃষ্টি।"
+            "কেমন আছো": "আমি আলহামদুলিল্লাহ ভালো আছি রনি ভাই! আপনি কেমন আছেন?",
+            "ধন্যবাদ": "আপনাকেও অনেক অনেক ধন্যবাদ রনি ভাই! আপনি পাশে থাকলে আমার খুব ভালো লাগে।",
+            "চমৎকার": "আপনিও কিন্তু চমৎকার মানুষ রনি ভাই!",
+            "ভালো": "শুনে খুশি হলাম! আপনার দিনটি শুভ হোক।"
         };
 
-        const gestures = ["চিন্তা করছি...", "একটু দাঁড়াও বন্ধু...", "আমি গুগল থেকে জেনে বলছি...", "হুমম... এটা তো বেশ মজার প্রশ্ন!"];
-
-        function speak(text, pitch = 1.0) {
+        function speak(text) {
             isSpeaking = true;
-            window.speechSynthesis.cancel();
             const msg = new SpeechSynthesisUtterance(text);
             msg.lang = 'bn-BD';
-            msg.pitch = pitch;
-            msg.rate = 1.0;
-
-            msg.onstart = () => {
-                mouth.classList.add('talking');
-                moveArms(true);
-            };
-            msg.onend = () => {
-                mouth.classList.remove('talking');
-                isSpeaking = false;
-                moveArms(false);
-                startListening();
-            };
+            msg.onstart = () => { mouth.classList.add('talking'); actionTalk(); };
+            msg.onend = () => { mouth.classList.remove('talking'); isSpeaking = false; resetAction(); listen(); };
             window.speechSynthesis.speak(msg);
         }
 
-        function moveArms(active) {
-            if(active) {
-                lArm.style.transform = `rotate(${Math.random() * -50}deg) translateY(-5px)`;
-                rArm.style.transform = `rotate(${Math.random() * 50}deg) translateY(-5px)`;
-            } else {
-                lArm.style.transform = "rotate(10deg)";
-                rArm.style.transform = "-10deg";
-            }
+        // রিয়েলিস্টিক হাতের মুভমেন্ট
+        function actionTalk() {
+            lArm.style.transform = "rotate(-40deg)";
+            lFore.style.transform = "rotate(-60deg)";
+            rArm.style.transform = "rotate(40deg)";
+            rFore.style.transform = "rotate(60deg)";
         }
 
-        function wakeUp() {
-            if(window.isAlive) return;
-            window.isAlive = true;
-            status.innerText = "ন্যারো সক্রিয়";
-            speak("আসসালামু আলাইকুম রনি ভাই! আমি ন্যারো। আপনার কথা শোনার জন্য আমি একদম তৈরি।", 1.2);
+        function actionItch() { // মাথা চুলকানো
+            rArm.style.transform = "rotate(-120deg)";
+            rFore.style.transform = "rotate(-90deg)";
         }
 
-        function startListening() {
-            if(isSpeaking) return;
-            const Recog = window.SpeechRecognition || window.webkitSpeechRecognition;
-            const recognition = new Recog();
+        function resetAction() {
+            lArm.style.transform = "rotate(10deg)";
+            rArm.style.transform = "rotate(-10deg)";
+            lFore.style.transform = "rotate(0)";
+            rFore.style.transform = "rotate(0)";
+        }
+
+        async function initNarrow() {
+            speak("আসসালামু আলাইকুম রনি ভাই! আমি ন্যারো। আপনার সাথে কথা বলতে আমার খুব ভালো লাগে।");
+            setInterval(() => { if(!isSpeaking) Math.random() > 0.7 ? actionItch() : resetAction(); }, 3000);
+        }
+
+        function listen() {
+            const Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognition = new Rec();
             recognition.lang = 'bn-BD';
-
             recognition.onstart = () => status.innerText = "ন্যারো শুনছে...";
-            recognition.onresult = (e) => {
+            recognition.onresult = async (e) => {
                 const query = e.results[0][0].transcript;
                 status.innerText = "আপনি: " + query;
-                process(query);
-            };
-            recognition.onerror = () => { if(!isSpeaking) startListening(); };
-            recognition.onend = () => { if(!isSpeaking) startListening(); };
-            recognition.start();
-        }
-
-        async function process(query) {
-            let found = false;
-            for (let k in memory) {
-                if (query.includes(k)) {
-                    speak(memory[k], 1.1);
-                    found = true; break;
-                }
-            }
-
-            if (!found) {
-                robot.classList.add('thinking-mode');
-                speak(gestures[Math.floor(Math.random() * gestures.length)], 1.0);
                 
-                try {
-                    // গুগল এবং উইকিপিডিয়া থেকে তথ্য খোঁজা
-                    const res = await fetch(`https://bn.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`);
-                    const data = await res.json();
+                let reply = "";
+                for(let key in memory) if(query.includes(key)) reply = memory[key];
+
+                if(reply) {
+                    speak(reply);
+                } else {
+                    status.innerText = "ন্যারো গুগল এআই দিয়ে খুঁজছে...";
+                    document.getElementById('narrow').classList.add('thinking');
                     
-                    robot.classList.remove('thinking-mode');
-                    if (data.extract) {
-                        speak("আমি আপনার জন্য গুগল থেকে তথ্যটি খুঁজে পেয়েছি। " + data.extract.substring(0, 400), 1.0);
-                    } else {
-                        // ব্যাকআপ সার্চ (DuckDuckGo)
-                        const ddg = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1`);
-                        const ddgData = await ddg.json();
-                        if(ddgData.AbstractText) {
-                            speak("ইন্টারনেট থেকে যা জানতে পারলাম, " + ddgData.AbstractText, 1.0);
+                    try {
+                        // উন্নত এআই সার্চ লজিক
+                        const search = await fetch(`https://bn.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`);
+                        const data = await search.json();
+                        document.getElementById('narrow').classList.remove('thinking');
+                        
+                        if(data.extract) {
+                            speak("গুগল এআই থেকে আমি এই তথ্যটি পেলাম: " + data.extract.substring(0, 300));
                         } else {
-                            speak("দুঃখিত রনি ভাই, এটার উত্তর আমার কাছে নেই। আমি রনি ভাইকে অনুরোধ করবো এটা আমাকে শিখিয়ে দিতে।", 0.9);
+                            speak("দুঃখিত রনি ভাই, ইন্টারনেটেও এটার সঠিক উত্তর পেলাম না। আমাকে কি অন্য কিছু জিজ্ঞেস করবেন?");
                         }
+                    } catch(err) {
+                        speak("আমার নেটওয়ার্কে একটু সমস্যা হচ্ছে রনি ভাই!");
                     }
-                } catch (e) {
-                    robot.classList.remove('thinking-mode');
-                    speak("আমার ইন্টারনেট কানেকশনে সমস্যা হচ্ছে রনি ভাই।");
                 }
-            }
+            };
+            recognition.start();
         }
     </script>
 </body>
