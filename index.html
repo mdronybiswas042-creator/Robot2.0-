@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Narrow AI - Humanoid</title>
+    <style>
+        :root { --glow: #00fff2; --danger: #ff0055; --bg: #050505; }
+        body { background: var(--bg); display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; color: white; font-family: 'Segoe UI', sans-serif; }
+
+        .robot-frame { position: relative; width: 320px; height: 400px; display: flex; flex-direction: column; align-items: center; }
+
+        /* ফেস ও রিয়েলিস্টিক চোখ */
+        .head { transition: 0.5s; margin-bottom: 50px; }
+        .eyes { display: flex; }
+        .eye { width: 60px; height: 60px; background: radial-gradient(circle, #fff, var(--glow)); border-radius: 50%; margin: 0 15px; box-shadow: 0 0 30px var(--glow); position: relative; animation: blink 4s infinite; }
+        .eye::after { content: ''; position: absolute; width: 15px; height: 15px; background: #000; border-radius: 50%; top: 22px; left: 22px; transition: 0.2s; }
+
+        /* ইমোশন অনুযায়ী মুখ */
+        .mouth { width: 90px; height: 6px; background: #fff; border-radius: 10px; margin: 40px auto 0; box-shadow: 0 0 10px #fff; transition: 0.2s; }
+        .talking { animation: talk 0.2s infinite; background: var(--danger); box-shadow: 0 0 20px var(--danger); }
+        .thinking-mode .eye { filter: hue-rotate(100deg); transform: scale(0.9); }
+
+        /* বাস্তবসম্মত হাত ও আঙুল */
+        .arm { position: absolute; top: 180px; width: 14px; height: 85px; background: #ddd; border-radius: 10px; transform-origin: top center; transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .left-arm { left: -30px; transform: rotate(10deg); }
+        .right-arm { right: -30px; transform: rotate(-10deg); }
+
+        .hand { width: 32px; height: 38px; background: #fff; border-radius: 6px; position: absolute; bottom: -35px; left: -9px; display: flex; justify-content: space-around; padding: 2px; box-shadow: 0 5px 10px rgba(0,0,0,0.3); }
+        .finger { width: 5px; height: 14px; background: #eee; border-radius: 2px; transition: 0.3s; }
+
+        @keyframes blink { 0%, 90%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.1); } }
+        @keyframes talk { 0%, 100% { height: 6px; } 50% { height: 35px; border-radius: 50%; } }
+
+        #status { position: absolute; bottom: -60px; color: var(--glow); font-size: 14px; letter-spacing: 1px; text-shadow: 0 0 5px var(--glow); text-align: center; width: 100%; }
+    </style>
+</head>
+<body onclick="wakeUp()">
+
+    <div class="robot-frame" id="robot">
+        <div class="head" id="head">
+            <div class="eyes">
+                <div class="eye"></div>
+                <div class="eye"></div>
+            </div>
+            <div class="mouth" id="mouth"></div>
+        </div>
+
+        <div class="arm left-arm" id="lArm"><div class="hand"><div class="finger"></div><div class="finger"></div><div class="finger"></div><div class="finger"></div></div></div>
+        <div class="arm right-arm" id="rArm"><div class="hand"><div class="finger"></div><div class="finger"></div><div class="finger"></div><div class="finger"></div></div></div>
+
+        <p id="status">টাচ করলে ন্যারো কথা বলা শুরু করবে...</p>
+    </div>
+
+    <script>
+        const mouth = document.getElementById('mouth');
+        const robot = document.getElementById('robot');
+        const status = document.getElementById('status');
+        const lArm = document.getElementById('lArm');
+        const rArm = document.getElementById('rArm');
+        let isSpeaking = false;
+
+        const memory = {
+            "তৈরি": "আমার প্রিয় রনি ভাই আমাকে অনেক যত্ন করে বানিয়েছেন।",
+            "বাড়ি": "রনি ভাই যেখানে থাকে, আমার বাড়িও সেখানে। অর্থাৎ বাগেরহাটের চিতলমারীতে!",
+            "নাম": "রনি ভাই আমার নাম রেখেছেন ন্যারো।",
+            "মালিক": "সৃষ্টিকর্তা আল্লাহ তাআলা সবকিছুর মালিক, তবে এই ডিজিটাল পৃথিবীতে আমি মোহাম্মদ রনি বিশ্বাসের সৃষ্টি।"
+        };
+
+        const gestures = ["চিন্তা করছি...", "একটু দাঁড়াও বন্ধু...", "আমি গুগল থেকে জেনে বলছি...", "হুমম... এটা তো বেশ মজার প্রশ্ন!"];
+
+        function speak(text, pitch = 1.0) {
+            isSpeaking = true;
+            window.speechSynthesis.cancel();
+            const msg = new SpeechSynthesisUtterance(text);
+            msg.lang = 'bn-BD';
+            msg.pitch = pitch;
+            msg.rate = 1.0;
+
+            msg.onstart = () => {
+                mouth.classList.add('talking');
+                moveArms(true);
+            };
+            msg.onend = () => {
+                mouth.classList.remove('talking');
+                isSpeaking = false;
+                moveArms(false);
+                startListening();
+            };
+            window.speechSynthesis.speak(msg);
+        }
+
+        function moveArms(active) {
+            if(active) {
+                lArm.style.transform = `rotate(${Math.random() * -50}deg) translateY(-5px)`;
+                rArm.style.transform = `rotate(${Math.random() * 50}deg) translateY(-5px)`;
+            } else {
+                lArm.style.transform = "rotate(10deg)";
+                rArm.style.transform = "-10deg";
+            }
+        }
+
+        function wakeUp() {
+            if(window.isAlive) return;
+            window.isAlive = true;
+            status.innerText = "ন্যারো সক্রিয়";
+            speak("আসসালামু আলাইকুম রনি ভাই! আমি ন্যারো। আপনার কথা শোনার জন্য আমি একদম তৈরি।", 1.2);
+        }
+
+        function startListening() {
+            if(isSpeaking) return;
+            const Recog = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognition = new Recog();
+            recognition.lang = 'bn-BD';
+
+            recognition.onstart = () => status.innerText = "ন্যারো শুনছে...";
+            recognition.onresult = (e) => {
+                const query = e.results[0][0].transcript;
+                status.innerText = "আপনি: " + query;
+                process(query);
+            };
+            recognition.onerror = () => { if(!isSpeaking) startListening(); };
+            recognition.onend = () => { if(!isSpeaking) startListening(); };
+            recognition.start();
+        }
+
+        async function process(query) {
+            let found = false;
+            for (let k in memory) {
+                if (query.includes(k)) {
+                    speak(memory[k], 1.1);
+                    found = true; break;
+                }
+            }
+
+            if (!found) {
+                robot.classList.add('thinking-mode');
+                speak(gestures[Math.floor(Math.random() * gestures.length)], 1.0);
+                
+                try {
+                    // গুগল এবং উইকিপিডিয়া থেকে তথ্য খোঁজা
+                    const res = await fetch(`https://bn.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`);
+                    const data = await res.json();
+                    
+                    robot.classList.remove('thinking-mode');
+                    if (data.extract) {
+                        speak("আমি আপনার জন্য গুগল থেকে তথ্যটি খুঁজে পেয়েছি। " + data.extract.substring(0, 400), 1.0);
+                    } else {
+                        // ব্যাকআপ সার্চ (DuckDuckGo)
+                        const ddg = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1`);
+                        const ddgData = await ddg.json();
+                        if(ddgData.AbstractText) {
+                            speak("ইন্টারনেট থেকে যা জানতে পারলাম, " + ddgData.AbstractText, 1.0);
+                        } else {
+                            speak("দুঃখিত রনি ভাই, এটার উত্তর আমার কাছে নেই। আমি রনি ভাইকে অনুরোধ করবো এটা আমাকে শিখিয়ে দিতে।", 0.9);
+                        }
+                    }
+                } catch (e) {
+                    robot.classList.remove('thinking-mode');
+                    speak("আমার ইন্টারনেট কানেকশনে সমস্যা হচ্ছে রনি ভাই।");
+                }
+            }
+        }
+    </script>
+</body>
+</html>
