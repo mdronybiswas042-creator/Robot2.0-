@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leon - Non-Stop AI</title>
+    <title>Leon - Smart Brain AI</title>
     <style>
         :root { --line: #000; }
         body { background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: 'Arial', sans-serif; }
-        .robot { position: relative; width: 300px; height: 450px; display: flex; flex-direction: center; flex-direction: column; align-items: center; }
+        .robot { position: relative; width: 300px; height: 450px; display: flex; flex-direction: column; align-items: center; }
         
-        /* স্কেচ অনুযায়ী মাথা ও চোখ */
+        /* আপনার স্কেচ অনুযায়ী মাথা */
         .head { width: 180px; height: 170px; background: #fff; border: 4.5px solid var(--line); border-radius: 50%; position: relative; z-index: 10; }
         .eyes { display: flex; justify-content: space-around; margin-top: 50px; padding: 0 15px; }
         .eye { width: 45px; height: 45px; background: var(--line); border-radius: 50%; position: relative; overflow: hidden; }
@@ -19,27 +19,25 @@
         .talking { animation: talk 0.2s infinite alternate; }
         @keyframes talk { from { height: 6px; } to { height: 25px; border-radius: 40%; } }
 
-        /* আপনার ছবির মতো সরাসরি হাত (কোনুই নেই) */
+        /* সরাসরি হাত (কোনুই নেই) */
         .body { width: 130px; height: 150px; background: #fff; border: 4.5px solid var(--line); border-radius: 40px 40px 15px 15px; margin-top: -10px; position: relative; }
         .arm { position: absolute; top: 15px; width: 22px; height: 110px; background: #fff; border: 3.5px solid var(--line); border-radius: 12px; transform-origin: top center; transition: 0.4s; }
         .left { left: -35px; transform: rotate(20deg); }
         .right { right: -35px; transform: rotate(-20deg); }
         
-        /* কালো আঙুল - নিচের দিকে */
+        /* কালো আঙুল */
         .hand { position: absolute; bottom: -45px; width: 55px; height: 50px; left: -18px; display: flex; justify-content: center; align-items: flex-start; }
         .finger { width: 7px; height: 32px; background: var(--line); border-radius: 8px; margin: 0 1.5px; }
         
-        /* অ্যাকশন এনিমেশন */
-        .arm-talking { animation: armWave 0.5s infinite alternate; }
-        @keyframes armWave { from { transform: rotate(15deg) translateY(0); } to { transform: rotate(30deg) translateY(-5px); } }
-        .gun-pose { transform: rotate(-95deg) !important; left: 45px !important; z-index: 20; }
+        .arm-move { animation: armWave 0.5s infinite alternate; }
+        @keyframes armWave { from { transform: rotate(15deg); } to { transform: rotate(35deg); } }
 
         #status { font-weight: bold; margin-top: 50px; color: #444; text-align: center; min-height: 25px; }
         .btn { background: #000; color: #fff; border: none; padding: 15px 40px; border-radius: 50px; cursor: pointer; margin-top: 20px; font-weight: bold; }
     </style>
 </head>
 <body>
-    <div class="robot" id="robot">
+    <div class="robot">
         <div class="head"><div class="eyes"><div class="eye" id="lE"></div><div class="eye" id="rE"></div></div><div class="mouth" id="mth"></div></div>
         <div class="body">
             <div class="arm left" id="lA"><div class="hand"><div class="finger"></div><div class="finger"></div><div class="finger"></div><div class="finger"></div><div class="finger"></div></div></div>
@@ -54,9 +52,18 @@
         const lE = document.getElementById('lE'), rE = document.getElementById('rE'), rA = document.getElementById('rA'), lA = document.getElementById('lA');
         let speaking = false, recognition;
 
+        // ইন-বিল্ট নলেজ বেস (ইন্টারনেট ছাড়াও উত্তর দিবে)
+        const brain = {
+            "বিভাগ": "বাংলাদেশে বর্তমানে মোট ৮টি বিভাগ আছে। সেগুলো হলো ঢাকা, চট্টগ্রাম, রাজশাহী, খুলনা, বরিশাল, সিলেট, রংপুর এবং ময়মনসিংহ।",
+            "রাজধানী": "বাংলাদেশের রাজধানী হলো ঢাকা।",
+            "ভাষা": "বাংলাদেশের রাষ্ট্রভাষা বাংলা।",
+            "রনি": "রনি ভাই আমার বস, সে আমাকে খুব যত্ন করে তৈরি করেছে!",
+            "বাড়ি": "আমার বাড়ি বাগেরহাটের চিতলমারী উপজেলায়।"
+        };
+
         function activateLeon() {
             document.getElementById('startBtn').style.display = 'none';
-            speak("আসসালামু আলাইকুম রনি ভাই! আমি এখন সবসময় শুনবো। আপনি ডাকলেই হবে।");
+            speak("আসসালামু আলাইকুম রনি ভাই! আমি লিওন। এখন আমি ইন্টারনেটের পাশাপাশি নিজের বুদ্ধি দিয়েও উত্তর দিতে পারবো।");
             setInterval(() => { if(!speaking) { lE.classList.add('blink'); rE.classList.add('blink'); setTimeout(()=> { lE.classList.remove('blink'); rE.classList.remove('blink'); }, 200); } }, 4000);
             setupRecognition();
         }
@@ -65,49 +72,55 @@
             const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
             recognition = new SpeechRec();
             recognition.lang = 'bn-BD';
-            recognition.continuous = true; // সবসময় শোনার জন্য
-            recognition.interimResults = false;
-
-            recognition.onstart = () => status.innerText = "লিওন শুনছে...";
+            recognition.continuous = true;
             recognition.onresult = (e) => {
                 const transcript = e.results[e.results.length - 1][0].transcript.trim();
                 status.innerText = "আপনি: " + transcript;
-                if(transcript.includes("লিওন") || transcript.includes("লিয়ন") || !speaking) handle(transcript);
+                handle(transcript);
             };
-            
-            // অটো-রিস্টার্ট লজিক (যাতে কয়েক সেকেন্ড পর বন্ধ না হয়)
             recognition.onend = () => { if(!speaking) recognition.start(); };
             recognition.start();
         }
 
         async function handle(q) {
-            if(q.includes("গুলি")) { rA.classList.add('gun-pose'); return speak("ঠাস ঠাস! আমি কিন্তু আপনাকে গুলি করে দিয়েছি রনি ভাই।"); }
-            
-            const memory = {"নাম": "লিয়ন", "বাড়ি": "চিতলমারী", "তৈরি": "রনি ভাই"};
-            for(let k in memory) { if(q.includes(k)) return speak("আমার " + k + " হলো " + memory[k]); }
+            // ১. ইন-বিল্ট ব্রেন চেক
+            for(let key in brain) {
+                if(q.includes(key)) return speak(brain[key]);
+            }
 
+            // ২. ইন্টারনেট সার্চ
             status.innerText = "ইন্টারনেটে খুঁজছি...";
-            speak("দাঁড়ান রনি ভাই, ইন্টারনেট থেকে উত্তরটা নিয়ে আসি...");
+            speak("দাঁড়ান রনি ভাই, ইন্টারনেট থেকে উত্তরটা চেক করছি...");
             
             try {
-                const res = await fetch(`https://bn.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(q)}`);
-                const data = await res.json();
-                if(data.extract) speak(data.extract.split('.')[0] + "।");
-                else speak("দুঃখিত রনি ভাই, ইন্টারনেটে এটা পাওয়া গেল না।");
-            } catch(e) { speak("ইন্টারনেট সংযোগে সমস্যা হচ্ছে।"); }
+                // ২-ধাপের সার্চ লজিক
+                const searchRes = await fetch(`https://bn.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(q)}&format=json&origin=*`);
+                const searchData = await searchRes.json();
+                
+                if (searchData.query.search.length > 0) {
+                    const title = searchData.query.search[0].title;
+                    const summaryRes = await fetch(`https://bn.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`);
+                    const summaryData = await summaryRes.json();
+                    
+                    if(summaryData.extract) speak(summaryData.extract.split('.')[0] + "।");
+                    else speak("দুঃখিত রনি ভাই, ইন্টারনেটে বিস্তারিত পেলাম না।");
+                } else {
+                    speak("রনি ভাই, এই প্রশ্নের উত্তর আমার জানা নেই। অন্য কিছু জিজ্ঞেস করুন।");
+                }
+            } catch(e) { speak("ইন্টারনেট কানেকশন দুর্বল রনি ভাই।"); }
         }
 
         function speak(text) {
             speaking = true;
-            if(recognition) recognition.stop(); // কথা বলার সময় লিসেনিং বন্ধ
+            if(recognition) recognition.stop();
             window.speechSynthesis.cancel();
             const s = new SpeechSynthesisUtterance(text);
             s.lang = 'bn-BD';
-            s.onstart = () => { mth.classList.add('talking'); lA.classList.add('arm-talking'); rA.classList.add('arm-talking'); };
+            s.onstart = () => { mth.classList.add('talking'); lA.classList.add('arm-move'); rA.classList.add('arm-move'); };
             s.onend = () => { 
-                mth.classList.remove('talking'); lA.classList.remove('arm-talking'); rA.classList.remove('arm-talking');
-                rA.classList.remove('gun-pose'); speaking = false; 
-                setTimeout(() => { if(recognition) recognition.start(); }, 500); // কথা শেষ হলে আবার শোনা শুরু
+                mth.classList.remove('talking'); lA.classList.remove('arm-move'); rA.classList.remove('arm-move');
+                speaking = false; 
+                setTimeout(() => { if(recognition) recognition.start(); }, 500); 
             };
             window.speechSynthesis.speak(s);
         }
