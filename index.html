@@ -3,48 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leon - Roni Bhai's Assistant</title>
+    <title>Leon - Auto AI Robot</title>
     <style>
-        :root { --skin: #ffdbac; --bg: #f0f0f0; }
-        body { background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; overflow: hidden; font-family: 'Arial', sans-serif; }
+        :root { --line: #000000; }
+        body { background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; overflow: hidden; font-family: 'Arial', sans-serif; }
 
-        /* রোবট ফ্রেম */
-        .robot { position: relative; width: 380px; height: 550px; display: flex; flex-direction: column; align-items: center; transition: 0.5s; }
+        .robot { position: relative; width: 300px; height: 450px; display: flex; flex-direction: column; align-items: center; transition: 0.3s; }
 
-        /* বিশাল মুখমণ্ডল - স্কেচ অনুযায়ী */
-        .head { width: 220px; height: 220px; background: #fff; border: 5px solid #000; border-radius: 50%; position: relative; z-index: 30; transition: 0.5s; }
-        .eyes { display: flex; justify-content: space-around; margin-top: 65px; padding: 0 15px; }
-        .eye { width: 55px; height: 55px; background: #000; border-radius: 50%; position: relative; overflow: hidden; border: 2px solid #000; }
+        /* আপনার স্কেচ অনুযায়ী মাথা */
+        .head { width: 190px; height: 180px; background: #fff; border: 4px solid var(--line); border-radius: 50%; position: relative; z-index: 10; }
+        .eyes { display: flex; justify-content: space-around; margin-top: 55px; padding: 0 15px; }
+        .eye { width: 50px; height: 50px; background: var(--line); border-radius: 50%; position: relative; overflow: hidden; }
         .eye::after { content: ''; position: absolute; width: 100%; height: 100%; background: #fff; top: -100%; transition: 0.1s; }
         .blink::after { top: 0; }
 
-        /* মুখ নড়াচড়া */
-        .mouth { width: 80px; height: 8px; background: #000; margin: 45px auto 0; border-radius: 15px; transition: 0.1s; }
-        .talking { animation: mouthTalk 0.15s infinite alternate; }
+        .mouth { width: 70px; height: 6px; background: var(--line); margin: 35px auto 0; border-radius: 10px; transition: 0.2s; }
+        .talking { animation: talk 0.2s infinite alternate; }
+        @keyframes talk { from { height: 6px; } to { height: 25px; border-radius: 50%; } }
 
-        /* বডি */
-        .body { width: 150px; height: 170px; background: #fff; border: 5px solid #000; border-radius: 50px 50px 10px 10px; margin-top: -15px; position: relative; z-index: 10; }
+        /* বডি - কনুই ছাড়া সরাসরি হাত */
+        .body { width: 140px; height: 150px; background: #fff; border: 4px solid var(--line); border-radius: 40px 40px 10px 10px; margin-top: -10px; position: relative; }
+        .pocket { width: 30px; height: 35px; border: 2.5px solid var(--line); position: absolute; bottom: 20px; right: 15px; border-radius: 5px; }
 
-        /* ৫টি আলাদা আঙুল - একদম ক্লিয়ার */
-        .arm { position: absolute; top: 20px; width: 30px; transform-origin: top center; z-index: 40; transition: 0.5s; }
-        .upper { height: 90px; background: #fff; border: 4px solid #000; border-radius: 20px; }
-        .forearm { height: 80px; background: #fff; border: 4px solid #000; border-radius: 20px; position: absolute; top: 85px; width: 100%; transform-origin: top center; transition: 0.4s; }
-        
-        /* হাতের তালু ও আলাদা আলাদা আঙুল */
-        .hand { width: 75px; height: 50px; background: var(--skin); border: 3px solid #000; border-radius: 12px; position: absolute; bottom: -54px; left: -22px; display: flex; justify-content: space-between; padding: 4px; box-sizing: border-box; align-items: flex-end; }
-        .finger { width: 9px; height: 28px; background: var(--skin); border: 2px solid #000; border-radius: 5px; }
+        /* হাত সরাসরি নিচের দিকে */
+        .arm { position: absolute; top: 20px; width: 25px; height: 120px; background: #fff; border: 3.5px solid var(--line); border-radius: 15px; transform-origin: top center; transition: 0.5s; display: flex; align-items: flex-end; justify-content: center; }
+        .left { left: -40px; transform: rotate(15deg); }
+        .right { right: -40px; transform: rotate(-15deg); }
 
-        .left { left: -50px; transform: rotate(15deg); }
-        .right { right: -50px; transform: rotate(-15deg); }
+        /* কালো আঙুল - নিচের দিকে মুখ করা */
+        .hand { position: absolute; bottom: -45px; width: 60px; height: 50px; display: flex; justify-content: center; align-items: flex-start; }
+        .finger { width: 7px; height: 35px; background: var(--line); border-radius: 10px; margin: 0 2px; transition: 0.2s; }
+        .arm-move { animation: handShake 0.5s infinite alternate; }
+        @keyframes handShake { from { transform: rotate(-15deg) translateY(0); } to { transform: rotate(-25deg) translateY(-10px); } }
 
-        /* এনিমেশনসমূহ */
-        @keyframes mouthTalk { from { height: 8px; border-radius: 15px; } to { height: 35px; border-radius: 50%; } }
-        .thinking-look { transform: rotate(-15deg) translateY(-10px); }
-        .dance { animation: danceMove 0.8s infinite alternate; }
-        @keyframes danceMove { from { transform: rotate(15deg) translateY(0); } to { transform: rotate(35deg) translateY(-10px); } }
+        /* গান অ্যাকশন */
+        .gun-pose { transform: rotate(-90deg) !important; left: 50px !important; }
 
-        #status { font-weight: bold; font-size: 20px; margin-top: 30px; color: #333; height: 30px; text-align: center; }
-        .btn { background: #000; color: #fff; border: none; padding: 18px 45px; border-radius: 50px; cursor: pointer; margin-top: 25px; font-size: 20px; font-weight: bold; }
+        #status { font-weight: bold; font-size: 18px; margin-top: 50px; color: #333; height: 25px; text-align: center; }
+        .btn { background: #000; color: #fff; border: none; padding: 15px 40px; border-radius: 50px; cursor: pointer; margin-top: 20px; font-size: 18px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
     </style>
 </head>
 <body>
@@ -55,113 +51,92 @@
             <div class="mouth" id="mth"></div>
         </div>
         <div class="body">
-            <div class="arm left" id="lA"><div class="upper"><div class="forearm" id="lF"><div class="hand" id="lHand">
+            <div class="pocket"></div>
+            <div class="arm left" id="lA"><div class="hand">
                 <div class="finger"></div><div class="finger"></div><div class="finger"></div><div class="finger"></div><div class="finger"></div>
-            </div></div></div></div>
-            <div class="arm right" id="rA"><div class="upper"><div class="forearm" id="rF"><div class="hand" id="rHand">
+            </div></div>
+            <div class="arm right" id="rA"><div class="hand">
                 <div class="finger"></div><div class="finger"></div><div class="finger"></div><div class="finger"></div><div class="finger"></div>
-            </div></div></div></div>
+            </div></div>
         </div>
         <p id="status">লিওন আপনার অপেক্ষায়...</p>
-        <button class="btn" onclick="startLeon()">লিওনকে জাগান</button>
+        <button class="btn" id="startBtn" onclick="initLeon()">লিওনকে জাগান</button>
     </div>
 
     <script>
         const status = document.getElementById('status'), mth = document.getElementById('mth'), robot = document.getElementById('robot');
-        const head = document.getElementById('head'), rA = document.getElementById('rA'), rF = document.getElementById('rF'), lHand = document.getElementById('lHand'), rHand = document.getElementById('rHand');
+        const lE = document.getElementById('lE'), rE = document.getElementById('rE'), rA = document.getElementById('rA'), lA = document.getElementById('lA');
         let speaking = false;
-
-        // স্মার্ট মেমোরি
-        let memory = JSON.parse(localStorage.getItem('leon_memory')) || {};
 
         const fixedQA = {
             "নাম": "আমার নাম লিয়ন।",
             "তৈরি": "আমাকে রনি ভাই তৈরি করেছে।",
-            "বাড়ি": "আমার বাড়ি বাগেরহাটের চিতলমারী উপজেলায়।",
-            "রনি কে": "রনি তো সে যে আমাকে তৈরি করেছে।",
-            "রনি কেমন": "রনি ভাইকে তো ভদ্রলোক বলে জানি, বাকিটা আল্লাহ জানে।",
-            "কেমন আছো": "আলহামদুলিল্লাহ ভালো আছি, তুমি?",
-            "কি অবস্থা": "এইতো আলহামদুলিল্লাহ, তোমার কী অবস্থা?"
+            "বাড়ি": "আমার বাড়ি বাগেরহাটের চিতলমারীতে।"
         };
-
-        const waitPhrases = ["সুন্দর প্রশ্ন, দাড়াও উত্তর দিচ্ছি", "দাড়াও উত্তরটা খুজে দিচ্ছি", "এক মিনিট অপেক্ষা করো বলছি"];
 
         function speak(text) {
             speaking = true;
             window.speechSynthesis.cancel();
             const s = new SpeechSynthesisUtterance(text);
-            s.lang = 'bn-BD'; s.pitch = 0.8; s.rate = 0.9;
-            s.onstart = () => { mth.classList.add('talking'); stopDance(); };
-            s.onend = () => { mth.classList.remove('talking'); speaking = false; resetAction(); listen(); };
+            s.lang = 'bn-BD'; s.rate = 0.9;
+            s.onstart = () => { 
+                mth.classList.add('talking'); 
+                lA.classList.add('arm-move'); rA.classList.add('arm-move');
+            };
+            s.onend = () => { 
+                mth.classList.remove('talking'); 
+                lA.classList.remove('arm-move'); rA.classList.remove('arm-move');
+                speaking = false; resetAction(); listen(); 
+            };
             window.speechSynthesis.speak(s);
         }
 
-        function actThink() {
-            head.classList.add('thinking-look');
-            rA.style.transform = "rotate(-110deg)";
-            rF.style.transform = "rotate(-90deg)";
+        function actGun() {
+            rA.classList.add('gun-pose');
+            setTimeout(() => rA.classList.remove('gun-pose'), 3000);
         }
 
-        function resetAction() {
-            head.classList.remove('thinking-look');
-            rA.style.transform = "rotate(-15deg)";
-            rF.style.transform = "rotate(0deg)";
-        }
+        function resetAction() { robot.classList.remove('dance'); }
 
-        function startDance() { if(!speaking) { lHand.classList.add('dance'); rHand.classList.add('dance'); } }
-        function stopDance() { lHand.classList.remove('dance'); rHand.classList.remove('dance'); }
-
-        function startLeon() {
-            speak("আসসালামু আলাইকুম রনি ভাই! আমি লিয়ন। আমি প্রস্তুত।");
-            setInterval(() => { if(!speaking) { document.getElementById('lE').classList.add('blink'); document.getElementById('rE').classList.add('blink'); setTimeout(()=> {document.getElementById('lE').classList.remove('blink'); document.getElementById('rE').classList.remove('blink');}, 150); } }, 4000);
-            setInterval(() => { if(!speaking && Math.random() > 0.7) startDance(); else setTimeout(stopDance, 4000); }, 10000);
+        function initLeon() {
+            document.getElementById('startBtn').style.display = 'none';
+            speak("আসসালামু আলাইকুম রনি ভাই! আমি এখন আপনার নাম ধরে ডাকলে অটোমেটিক শুনবো।");
+            setInterval(() => { if(!speaking) { lE.classList.add('blink'); rE.classList.add('blink'); setTimeout(()=> { lE.classList.remove('blink'); rE.classList.remove('blink'); }, 200); } }, 4000);
         }
 
         function listen() {
             const Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
             if(!Rec) return;
-            const r = new Rec(); r.lang = 'bn-BD';
-            r.onstart = () => status.innerText = "লিওন শুনছে...";
+            const r = new Rec(); r.lang = 'bn-BD'; r.continuous = false;
+            r.onstart = () => status.innerText = "লিওন আপনার কথা শুনছে...";
             r.onresult = (e) => handle(e.results[0][0].transcript);
+            r.onerror = () => { if(!speaking) listen(); }; // এরর হলে আবার লিসেনিং মোডে যাবে
             r.start();
         }
 
         async function handle(q) {
             status.innerText = "আপনি: " + q;
-
-            // ১. সেভ করার লজিক
-            if(q.includes("সেভ করো") || q.includes("মনে রাখো")) {
-                let info = q.replace("সেভ করো", "").replace("মনে রাখো", "").trim();
-                memory[info.split(" ")[0]] = info;
-                localStorage.setItem('leon_memory', JSON.stringify(memory));
-                return speak("ঠিক আছে রনি ভাই, আমি মনে রাখবো যে " + info);
+            
+            // গান অ্যাকশন চেক
+            if(q.includes("গুলি") || q.includes("মারো")) {
+                actGun();
+                return speak("এই নিন রনি ভাই, ঠাস ঠাস! ভয় পেলেন?");
             }
 
-            // ২. মেমোরি চেক
-            for(let key in memory) { if(q.includes(key)) return speak("আপনি বলেছিলেন, " + memory[key]); }
-
-            // ৩. ফিক্সড উত্তর
             for(let key in fixedQA) { if(q.includes(key)) return speak(fixedQA[key]); }
 
-            // ৪. ইন্টারনেট সার্চ (গুগল এআই/উইকিপিডিয়া)
-            actThink();
-            speak(waitPhrases[Math.floor(Math.random() * waitPhrases.length)]);
+            // ইন্টারনেট সার্চ লজিক
+            status.innerText = "লিওন ইন্টারনেটে তথ্য খুঁজছে...";
+            speak("সুন্দর প্রশ্ন রনি ভাই, দাঁড়ান উত্তরটা খুঁজে দিচ্ছি...");
             
             try {
-                // উইকিপিডিয়া এবং গুগল সার্চের আদলে ডাটা ফেচ
                 const res = await fetch(`https://bn.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(q)}`);
                 const data = await res.json();
-                
                 setTimeout(() => {
-                    if(data.extract) {
-                        speak(data.extract.split('.')[0] + "।");
-                    } else {
-                        speak("দুঃখিত রনি ভাই, এটার উত্তর ইন্টারনেটে খুঁজে পেলাম না। অন্য কিছু জিজ্ঞেস করুন?");
-                    }
-                }, 2000);
-            } catch(e) { 
-                speak("ইন্টারনেট সংযোগে সমস্যা হচ্ছে রনি ভাই।"); 
-            }
+                    if(data.extract) speak(data.extract.split('.')[0] + "।");
+                    else speak("দুঃখিত রনি ভাই, এটার উত্তর আমি খুঁজে পেলাম না। অন্য কিছু জিজ্ঞেস করুন?");
+                }, 1000);
+            } catch(e) { speak("ইন্টারনেট কানেকশনে সমস্যা হচ্ছে রনি ভাই।"); }
         }
     </script>
 </body>
