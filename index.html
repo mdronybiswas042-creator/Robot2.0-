@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leon - Final Version</title>
+    <title>Leon - Final Corrected Version</title>
     <style>
         :root { --line: #000; --bg: #fff; }
         body { background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: 'Arial', sans-serif; overflow: hidden; }
         .robot { position: relative; width: 300px; height: 500px; display: flex; flex-direction: column; align-items: center; }
         
-        /* মাথা একদম সোজা থাকবে, কোনোভাবেই বাঁকাবে না */
         .head { 
             width: 200px; height: 180px; background: #fff; 
             border: 5px solid var(--line); border-radius: 55px; 
@@ -23,7 +22,6 @@
         .eye::after { content: ''; position: absolute; width: 10px; height: 10px; background: #fff; border-radius: 50%; top: 7px; right: 7px; }
         .blink { transform: scaleY(0.1); }
 
-        /* মুখের এনিমেশন - একটানা চলবে */
         .mouth { width: 45px; height: 6px; background: var(--line); margin-top: 35px; border-radius: 10px; transition: 0.1s; }
         .talking { animation: mouthMove 0.18s infinite alternate !important; }
         @keyframes mouthMove { 
@@ -39,8 +37,9 @@
         .left { left: -40px; transform: rotate(18deg); }
         .right { right: -40px; transform: rotate(-18deg); }
         
+        /* --- সমাধান ৩: হাতের আঙুল ফিরিয়ে আনা হয়েছে --- */
         .hand { position: absolute; bottom: -40px; width: 60px; height: 50px; left: -18px; display: flex; justify-content: center; }
-        .finger { width: 6px; height: 30px; background: var(--line); border-radius: 8px; margin: 0 1px; }
+        .finger { width: 6px; height: 30px; background: var(--line); border-radius: 8px; margin: 0 1.5px; }
 
         .hands-up .left { transform: rotate(160deg); }
         .hands-up .right { transform: rotate(-160deg); }
@@ -58,29 +57,45 @@
 <body>
 
     <div class="robot" id="leonRobot">
-        <div class="head"><div class="eyes"><div class="eye" id="lE"></div><div class="eye" id="rE"></div></div><div class="mouth" id="mth"></div></div>
-        <div class="body"><div class="arm left" id="lA"><div class="hand"><div></div><div></div><div></div><div></div><div></div></div></div><div class="arm right" id="rA"><div class="bullet" id="bullet"></div><div class="hand"><div></div><div></div><div></div><div></div><div></div></div></div></div>
+        <div class="head">
+            <div class="eyes"><div class="eye" id="lE"></div><div class="eye" id="rE"></div></div>
+            <div class="mouth" id="mth"></div>
+        </div>
+        <div class="body">
+            <div class="arm left" id="lA">
+                <div class="hand">
+                    <div class="finger"></div><div class="finger"></div><div class="finger"></div><div class="finger"></div><div class="finger"></div>
+                </div>
+            </div>
+            <div class="arm right" id="rA">
+                <div class="bullet" id="bullet"></div>
+                <div class="hand">
+                    <div class="finger"></div><div class="finger"></div><div class="finger"></div><div class="finger"></div><div class="finger"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div id="status">লিওন আপনার অপেক্ষায়...</div>
     <button class="btn" id="startBtn" onclick="activateLeon()">লিওনকে জাগান</button>
 
     <script>
-        const status = document.getElementById('status'), mth = document.getElementById('mth'), robot = document.getElementById('leonRobot');
+        const status = document.getElementById('status'), mth = document.getElementById('mth');
         let speaking = false, recognition;
 
         const brain = {
             "তোমার নাম": "আমার নাম লিয়ন।",
             "তুমি কে": "আমার নাম লিয়ন।",
             "কে তুমি": "আমার নাম লিয়ন।",
-            "তৈরি করেছে": "আমাকে রনি ভাই তৈরি করেছে।",
-            "বানিয়েছে": "আমাকে রনি ভাই তৈরি করেছে।",
-            "বাড়ি": "আমার বাড়ি বাগেরহাটের চিতলমারী উপজেলায়।",
-            "থাকো": "আমার বাড়ি বাগেরহাটের চিতলমারী উপজেলায়।",
-            "ঠিকানা": "আমার বাড়ি বাগেরহাটের চিতলমারী উপজেলায়।",
+            "তোমাকে কে তৈরি করেছে": "আমাকে রনি ভাই তৈরি করেছে।",
+            "তোমাকে কে বানিয়েছে": "আমাকে রনি ভাই তৈরি করেছে।",
+            "তোমার বাড়ি": "আমার বাড়ি বাগেরহাটের চিতলমারী উপজেলায়।",
+            "তুমি কোথায় থাকো": "আমার বাড়ি বাগেরহাটের চিতলমারী উপজেলায়।",
+            "তোমার ঠিকানা": "আমার বাড়ি বাগেরহাটের চিতলমারী উপজেলায়।",
             "রনি কে": "রনি তো সে যে আমাকে তৈরি করেছে।",
-            "রনি ভাই": "রনি তো সে যে আমাকে তৈরি করেছে।",
+            "রনি ভাইকে চেনো": "রনি তো সে যে আমাকে তৈরি করেছে।",
             "রনি কেমন": "রনি ভাইকেতো ভদ্রলোক বলে জানি, বাকিটা আল্লাহ জানে।",
+            "রনি ভাই সম্পর্কে": "রনি ভাইকেতো ভদ্রলোক বলে জানি, বাকিটা আল্লাহ জানে।",
             "কেমন আছো": "আলহামদুলিল্লাহ ভালো আছি, তুমি?",
             "কী অবস্থা": "এইতো আলহামদুলিল্লাহ, তোমার কী অবস্থা?",
             "কি খবর": "এইতো আলহামদুলিল্লাহ, তোমার কী অবস্থা?",
@@ -94,46 +109,61 @@
             setupRecognition();
         }
 
-        // --- সমাধান ১: স্টপ কমান্ড এবং প্রশ্ন বোঝার লজিক ---
+        // --- সমাধান ১: কথা বলার সময়ও "স্টপ" কমান্ড কাজ করবে ---
         function setupRecognition() {
             const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
             recognition = new SpeechRec();
             recognition.lang = 'bn-BD';
-            recognition.continuous = false; // ফাইনাল রেজাল্টের পর নিজে থেকে থামবে
-            recognition.interimResults = false;
+            recognition.continuous = true; // মাইক্রোফোন সবসময় চালু থাকবে
+            recognition.interimResults = true; // দ্রুত শোনার জন্য
 
             recognition.onresult = (e) => {
-                const transcript = e.results[0][0].transcript.trim().toLowerCase();
-                status.innerText = "আপনি: " + transcript;
-                
-                if (transcript === "স্টপ" || transcript === "থামো") {
+                let transcript = "";
+                for (let i = e.resultIndex; i < e.results.length; ++i) {
+                    transcript += e.results[i][0].transcript;
+                }
+                transcript = transcript.trim().toLowerCase();
+
+                // কথা বলার সময়ও যদি "স্টপ" বলা হয়, সাথে সাথে থামবে
+                if (transcript.includes("স্টপ") || transcript.includes("থামো")) {
                     window.speechSynthesis.cancel();
+                    mth.classList.remove('talking');
+                    speaking = false;
                     return;
                 }
                 
-                if (!speaking) {
+                // শুধুমাত্র ফাইনাল রেজাল্ট পেলে কমান্ড প্রসেস করবে
+                if (e.results[e.results.length - 1].isFinal && !speaking) {
+                    status.innerText = "আপনি: " + transcript;
                     handleCommand(transcript);
                 }
             };
             
             recognition.onend = () => {
-                // কথা না বললে বা বলার পর আবার শোনার জন্য প্রস্তুত
-                if (!speaking) {
-                    recognition.start();
-                }
+                recognition.start(); // বন্ধ হয়ে গেলে আবার চালু হবে
             };
             
             recognition.start();
         }
 
-        // --- সমাধান ২: নির্ভুল উত্তর এবং ইন্টারনেট সার্চ ---
+        // --- সমাধান ২: নির্ভুল উত্তর দেওয়ার লজিক ---
         async function handleCommand(q) {
-            // ইন-বিল্ট ব্রেন থেকে নিখুঁত উত্তর খোঁজা
+            // প্রশ্নটি ব্রেনের উত্তরের সাথে হুবহু মেলানোর চেষ্টা
             let answer = null;
             for (const key in brain) {
-                if (q.includes(key)) {
+                if (q === key) { // এখানে q.includes(key) এর বদলে q === key ব্যবহার করা হয়েছে
                     answer = brain[key];
                     break;
+                }
+            }
+            
+            // যদি হুবহু না মেলে, তাহলে কাছাকাছি কীওয়ার্ড মেলানোর চেষ্টা
+            if (!answer) {
+                 for (const key in brain) {
+                    if (q.includes(key)) {
+                        answer = brain[key];
+                        break;
+                    }
                 }
             }
 
@@ -142,8 +172,8 @@
                 return;
             }
 
-            // ইন্টারনেট সার্চ (শুধুমাত্র ব্রেনে উত্তর না পেলে)
-            status.innerText = "ইন্টারনেটে খুঁজছি...";
+            // যদি ব্রেনে উত্তর না থাকে, শুধুমাত্র তখনই ইন্টারনেট সার্চ
+            speak("একটু দাঁড়ান, ইন্টারনেট থেকে দেখছি।");
             try {
                 const searchRes = await fetch(`https://bn.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(q)}&format=json&origin=*`);
                 const searchData = await searchRes.json();
@@ -164,7 +194,6 @@
             }
         }
         
-        // --- সমাধান ৩: মুখের এনিমেশন ও কথা বলা ---
         function speak(text) {
             speaking = true;
             window.speechSynthesis.cancel();
@@ -174,15 +203,10 @@
             s.pitch = 1.2;
             s.rate = 0.9;
             
-            s.onstart = () => {
-                mth.classList.add('talking');
-            };
-            
+            s.onstart = () => { mth.classList.add('talking'); };
             s.onend = () => {
                 mth.classList.remove('talking');
                 speaking = false;
-                // কথা শেষ হলে আবার শোনা শুরু
-                try { recognition.start(); } catch(e) {}
             };
             
             window.speechSynthesis.speak(s);
