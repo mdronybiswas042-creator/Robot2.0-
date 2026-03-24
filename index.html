@@ -3,76 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leon - Emotional AI Pet</title>
+    <title>Leon - Smart Emotional AI</title>
     <style>
-        :root { --line: #2c3e50; --bg: #fdfdfd; }
-        body { background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; }
+        :root { --line: #1a1a1a; --bg: #ffffff; }
+        body { background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: 'Arial', sans-serif; overflow: hidden; }
         
-        .robot { position: relative; width: 320px; height: 520px; display: flex; flex-direction: column; align-items: center; transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .robot { position: relative; width: 320px; height: 500px; display: flex; flex-direction: column; align-items: center; transition: 0.4s; }
         
         /* বক্সি-রাউন্ড মাথা */
         .head { 
-            width: 210px; height: 185px; background: #fff; 
+            width: 200px; height: 180px; background: #fff; 
             border: 5px solid var(--line); 
-            border-radius: 55px; /* বক্সি-রাউন্ড শেইপ */
+            border-radius: 50px; 
             position: relative; z-index: 10; 
             display: flex; flex-direction: column; align-items: center; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-            transition: 0.3s ease;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
         
-        .eyes { display: flex; justify-content: space-around; width: 100%; margin-top: 55px; padding: 0 30px; box-sizing: border-box; }
-        .eye { width: 42px; height: 42px; background: var(--line); border-radius: 50%; position: relative; transition: transform 0.1s; }
-        .eye::after { content: ''; position: absolute; width: 10px; height: 10px; background: #fff; border-radius: 50%; top: 6px; right: 6px; }
+        .eyes { display: flex; justify-content: space-around; width: 100%; margin-top: 50px; padding: 0 28px; box-sizing: border-box; }
+        .eye { width: 44px; height: 44px; background: var(--line); border-radius: 50%; position: relative; }
+        .eye::after { content: ''; position: absolute; width: 10px; height: 10px; background: #fff; border-radius: 50%; top: 7px; right: 7px; }
         
-        /* দ্রুত পলক ফেলা (Fast Blink) */
+        /* পলক ফেলা (Fast Blink) */
         .blink { animation: fastBlink 0.15s ease-in-out; }
         @keyframes fastBlink { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.1); } }
 
-        /* মুখের বাস্তবসম্মত মুভমেন্ট */
+        /* মুখের মুভমেন্ট */
         .mouth { width: 45px; height: 6px; background: var(--line); margin-top: 35px; border-radius: 10px; transition: 0.2s; }
-        .talking { animation: mouthMove 0.12s infinite alternate; }
-        @keyframes mouthMove { 0% { height: 4px; width: 40px; } 100% { height: 22px; width: 30px; border-radius: 50%; } }
+        .talking { animation: speakAnim 0.12s infinite alternate; }
+        @keyframes speakAnim { 0% { height: 5px; width: 42px; } 100% { height: 22px; width: 35px; border-radius: 50%; } }
         
-        .laughing { width: 55px; height: 28px; border-radius: 0 0 55px 55px; border: 4px solid var(--line); border-top: none; background: transparent; }
+        .laughing { width: 50px; height: 25px; border-radius: 0 0 50px 50px; border: 4px solid var(--line); border-top: none; }
         .crying { width: 40px; height: 8px; border-radius: 20px 20px 0 0; border: 4px solid var(--line); border-bottom: none; }
 
-        .body-container { position: relative; width: 155px; height: 180px; background: #fff; border: 5px solid var(--line); border-radius: 45px 45px 25px 25px; margin-top: -15px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+        .body-container { position: relative; width: 150px; height: 175px; background: #fff; border: 5px solid var(--line); border-radius: 40px 40px 25px 25px; margin-top: -12px; }
         
-        /* হাত ও ৫ আঙুল */
-        .arm { position: absolute; top: 30px; width: 26px; height: 115px; background: #fff; border: 4px solid var(--line); border-radius: 15px; transform-origin: top center; transition: 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        /* ৫ আঙুলের হাত */
+        .arm { position: absolute; top: 25px; width: 25px; height: 110px; background: #fff; border: 4px solid var(--line); border-radius: 15px; transform-origin: top center; transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .left { left: -42px; transform: rotate(18deg); }
         .right { right: -42px; transform: rotate(-18deg); }
         
         .hand { position: absolute; bottom: -35px; width: 60px; height: 50px; left: -20px; display: flex; justify-content: center; }
-        .finger { width: 6px; height: 28px; background: var(--line); border-radius: 10px; margin: 0 1.2px; transition: 0.2s; }
+        .finger { width: 6px; height: 28px; background: var(--line); border-radius: 10px; margin: 0 1.2px; }
 
-        /* নতুন মুভমেন্ট এনিমেশন */
+        /* মুভমেন্টস */
         .hands-up .left { transform: rotate(160deg); }
         .hands-up .right { transform: rotate(-160deg); }
-        .scratch-ear .right { transform: rotate(-150deg) translateY(-35px); animation: shake 0.3s infinite; }
-        .touch-face .right { transform: rotate(-130deg) translateX(-20px) translateY(-40px); }
-        .pocket .left { transform: rotate(40deg) translateY(10px); }
-        .pocket .right { transform: rotate(-40deg) translateY(10px); }
-        .thinking .head { transform: rotate(-10deg); }
-        .thinking .right { transform: rotate(-140deg) translateY(-20px); }
-
+        .scratch-ear .right { transform: rotate(-155deg) translateY(-30px); animation: scratch 0.3s infinite; }
+        .think-mode .head { transform: rotate(-8deg); }
         .shoot-mode .right { transform: rotate(-90deg); }
-        .bullet { position: absolute; width: 15px; height: 6px; background: #e74c3c; border-radius: 50%; right: -60px; top: 10px; display: none; animation: fly 0.25s linear infinite; }
+        .bullet { position: absolute; width: 15px; height: 6px; background: #ff3333; border-radius: 50%; right: -60px; top: 10px; display: none; animation: fly 0.25s linear infinite; }
         
-        @keyframes shake { 0%, 100% { transform: rotate(-150deg); } 50% { transform: rotate(-160deg); } }
+        @keyframes scratch { 0%, 100% { transform: rotate(-155deg); } 50% { transform: rotate(-165deg); } }
         @keyframes fly { from { transform: translateX(0); } to { transform: translateX(150px); opacity: 0; } }
-        @keyframes talkWave { from { transform: rotate(10deg); } to { transform: rotate(40deg); } }
 
-        #status { font-weight: 600; margin-top: 35px; color: #444; height: 35px; text-align: center; font-size: 18px; }
-        .btn { background: #2c3e50; color: #fff; border: none; padding: 16px 48px; border-radius: 50px; cursor: pointer; margin-top: 25px; font-weight: bold; font-size: 19px; box-shadow: 0 6px 18px rgba(0,0,0,0.15); transition: 0.2s; }
-        .btn:hover { transform: scale(1.05); }
+        #status { font-weight: 600; margin-top: 35px; color: #333; height: 35px; text-align: center; }
+        .btn { background: #000; color: #fff; border: none; padding: 15px 45px; border-radius: 50px; cursor: pointer; margin-top: 25px; font-weight: bold; font-size: 18px; }
     </style>
 </head>
 <body>
 
     <div class="robot" id="leonRobot">
-        <div class="head" id="mainHead">
+        <div class="head">
             <div class="eyes">
                 <div class="eye" id="lE"></div>
                 <div class="eye" id="rE"></div>
@@ -98,10 +90,8 @@
         const lE = document.getElementById('lE'), rE = document.getElementById('rE'), lA = document.getElementById('lA'), rA = document.getElementById('rA');
         
         let speaking = false, recognition;
-        const viralDialogues = [
-            "মাথা নষ্ট মামা!", "ওরে বাবা, এটা কী শুনলাম!", "খেলা হবে!", "অস্থির ভাই অস্থির!", 
-            "বিউটিফুল!", "বুঝতে পারলেন না ঘটনা?", "উফ্! কী জ্বালা!", "সেই লেভেল ভাই!", "একদম কোপাইয়া দিমু!"
-        ];
+        // ভাইরাল ডায়লগ (অনুরোধ অনুযায়ী "উফ কী জালা" বাদ দেওয়া হয়েছে)
+        const viralDialogues = ["মাথা নষ্ট মামা!", "ওরে বাবা, এটা কী শুনলাম!", "খেলা হবে!", "অস্থির ভাই অস্থির!", "বিউটিফুল!", "একদম কোপাইয়া দিমু!", "মারাত্মক তো!", "সেই লেভেল ভাই!"];
 
         const brain = {
             "নাম": "আমার নাম লিয়ন।",
@@ -117,82 +107,105 @@
             "কেমন আছো": "আলহামদুলিল্লাহ ভালো আছি, তুমি কেমন আছো বন্ধু?",
             "কী অবস্থা": "এইতো আলহামদুলিল্লাহ, তোমার কী অবস্থা?",
             "কী খবর": "এইতো আলহামদুলিল্লাহ, তোমার খবর বলো?",
-            "ধন্যবাদ": "তোমাকেও অনেক অনেক ধন্যবাদ! তুমি আসলেই খুব ভালো।",
+            "ধন্যবাদ": "তোমাকেও অনেক অনেক ধন্যবাদ! তুমি অনেক ভালো মানুষ।",
             "সুন্দর": "ধন্যবাদ! প্রশংসা শুনতে কার না ভালো লাগে বলো?"
         };
 
         function activateLeon() {
             document.getElementById('startBtn').style.display = 'none';
-            speak("আসসালামু আলাইকুম! আমি লিওন। রনি ভাই আমাকে অনেক মায়া দিয়ে আপনার জন্য তৈরি করেছে।");
+            speak("আসসালামু আলাইকুম! আমি লিওন। রনি ভাই আমাকে অনেক ভালোবাসা দিয়ে আপনার জন্য তৈরি করেছে।");
             startIdleLoop();
             setupRecognition();
         }
 
         function setupRecognition() {
             const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRec) {
+                alert("দুঃখিত, আপনার ব্রাউজার ভয়েস সাপোর্ট করে না।");
+                return;
+            }
             recognition = new SpeechRec();
             recognition.lang = 'bn-BD';
             recognition.continuous = true;
+            recognition.interimResults = false;
 
             recognition.onresult = (e) => {
                 const transcript = e.results[e.results.length - 1][0].transcript.trim();
                 status.innerText = "আপনি: " + transcript;
                 handleCommand(transcript);
             };
-            recognition.onend = () => { if(!speaking) recognition.start(); };
+
+            recognition.onerror = (event) => {
+                console.log("Error: " + event.error);
+                if (event.error === 'no-speech' || event.error === 'network') {
+                    restartRecognition();
+                }
+            };
+
+            recognition.onend = () => {
+                if (!speaking) restartRecognition();
+            };
+
             recognition.start();
+        }
+
+        function restartRecognition() {
+            try { recognition.start(); } catch(e) {}
         }
 
         async function handleCommand(q) {
             resetAnimations();
             
-            if(q.includes("লিয়ন") || q.includes("লিওন")) { return speak("জী! আমি আপনার কথা শুনছি বন্ধু।"); }
-            if(q.includes("স্টপ") || q.includes("থামো")) { window.speechSynthesis.cancel(); return; }
+            if(q.includes("লিয়ন") || q.includes("লিওন")) { return speak("জী! আমি আপনার কথা শুনছি।"); }
+            if(q.includes("স্টপ") || q.includes("থামো")) { window.speechSynthesis.cancel(); speaking = false; return; }
             if(q.includes("হ্যান্স আপ")) { robot.classList.add('hands-up'); return speak("ঠিক আছে বন্ধু, হাত জাগালাম! ভয় পাবেন না কিন্তু।"); }
-            if(q.includes("হাসো")) { mth.className = 'mouth laughing'; return speak("হা হা হা! আপনার কথা শুনে খুব হাসি পাচ্ছে।"); }
-            if(q.includes("কাঁদো")) { mth.className = 'mouth crying'; return speak("উ হু হু, আমি কাঁদছি। আমার খুব কষ্ট হচ্ছে।"); }
-            if(q.includes("গুলি")) { robot.classList.add('shoot-mode'); document.getElementById('bullet').style.display='block'; return speak("ডিসকাও! ডিসকাও! আমি কিন্তু অনেক ভালো গুলি করতে পারি!"); }
+            if(q.includes("হাসো")) { mth.className = 'mouth laughing'; return speak("হা হা হা! অনেক মজা পেলাম আপনার কথা শুনে।"); }
+            if(q.includes("কাঁদো")) { mth.className = 'mouth crying'; return speak("উ হু হু, আমি কাঁদছি। আমার খুব মন খারাপ বন্ধু।"); }
+            if(q.includes("গুলি")) { robot.classList.add('shoot-mode'); document.getElementById('bullet').style.display='block'; return speak("ডিসকাও! ডিসকাও! এই নিন গুলি!"); }
             if(q.includes("গজল")) return speak("বিনা বাজনায় গজল গাইছি... লা ইলাহা ইল্লাল্লাহ, মুহাম্মাদুর রাসুলুল্লাহ। সুবহানাল্লাহ, আলহামদুলিল্লাহ।");
 
-            // প্রশ্নোত্তর চেক
             for(let key in brain) {
                 if(q.includes(key)) {
-                    robot.classList.add('thinking');
-                    status.innerText = "লিওন ভাবছে...";
-                    setTimeout(() => speak(brain[key]), 1200);
+                    robot.classList.add('think-mode');
+                    setTimeout(() => speak(brain[key]), 1000);
                     return;
                 }
             }
 
-            // ইন্টারনেট সার্চ
-            status.innerText = "একটু দাঁড়ান, আমি খুঁজে দেখছি...";
+            // ইন্টারনেট
+            status.innerText = "আমি খুঁজছি...";
             try {
                 const res = await fetch(`https://bn.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(q)}`);
                 const data = await res.json();
                 if(data.extract) speak(data.extract.split('.')[0] + "।");
-                else speak("এই বিষয়ে তো আমি ঠিক জানি না, তবে রনি ভাইকে জিজ্ঞেস করে জেনে নেবো।");
-            } catch(e) { speak("ইন্টারনেট কানেকশনটা একটু চেক করলে ভালো হতো বন্ধু।"); }
+                else speak("এই বিষয়ে আমার কাছে তথ্য নেই, তবে রনি ভাইকে জিজ্ঞেস করে জেনে নেবো।");
+            } catch(e) { speak("ইন্টারনেট কানেকশনটা একটু চেক করবেন কি বন্ধু?"); }
         }
 
         function speak(text) {
             speaking = true;
+            if(recognition) try { recognition.stop(); } catch(e) {}
+            
             window.speechSynthesis.cancel();
             const s = new SpeechSynthesisUtterance(text);
             s.lang = 'bn-BD';
-            s.pitch = 1.3; // কিউট ও আবেগপ্রবণ ভয়েস
-            s.rate = 0.85; // একটু ধীরগতির যাতে আবেগ বোঝা যায়
+            s.pitch = 1.3; 
+            s.rate = 0.85; 
             
             s.onstart = () => { 
                 mth.classList.add('talking');
-                lA.style.animation = "talkWave 0.5s infinite alternate";
-                rA.style.animation = "talkWave 0.5s infinite alternate reverse";
+                lA.style.animation = "wave 0.5s infinite alternate";
+                rA.style.animation = "wave 0.5s infinite alternate reverse";
             };
+            
             s.onend = () => { 
                 mth.classList.remove('talking');
                 lA.style.animation = ""; rA.style.animation = "";
                 speaking = false; 
                 resetAnimations();
+                setTimeout(restartRecognition, 500); 
             };
+            
             window.speechSynthesis.speak(s);
         }
 
@@ -203,21 +216,19 @@
                     resetAnimations();
                     if(rand < 0.15) { robot.classList.add('scratch-ear'); speak(viralDialogues[Math.floor(Math.random()*viralDialogues.length)]); }
                     else if(rand < 0.3) { robot.classList.add('shoot-mode'); document.getElementById('bullet').style.display='block'; }
-                    else if(rand < 0.45) { robot.classList.add('touch-face'); }
-                    else if(rand < 0.6) { robot.classList.add('pocket'); }
                     else if(rand < 0.8) { lE.classList.add('blink'); rE.classList.add('blink'); }
-                    
                     setTimeout(resetAnimations, 2500);
                 }
             }, 5000);
         }
 
         function resetAnimations() {
-            robot.classList.remove('hands-up', 'scratch-ear', 'shoot-mode', 'touch-face', 'pocket', 'thinking');
+            robot.classList.remove('hands-up', 'scratch-ear', 'shoot-mode', 'think-mode');
             mth.className = 'mouth';
             lE.classList.remove('blink'); rE.classList.remove('blink');
             document.getElementById('bullet').style.display='none';
         }
     </script>
+    <style> @keyframes wave { from { transform: rotate(10deg); } to { transform: rotate(40deg); } } </style>
 </body>
 </html>
