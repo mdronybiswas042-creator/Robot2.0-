@@ -3,32 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leon - Smart AI Pet</title>
+    <title>Leon - Final Version</title>
     <style>
         :root { --line: #000; --bg: #fff; }
         body { background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: 'Arial', sans-serif; overflow: hidden; }
-        
         .robot { position: relative; width: 300px; height: 500px; display: flex; flex-direction: column; align-items: center; }
         
-        /* বক্সি-রাউন্ড মাথা - সবসময় সোজা থাকবে */
+        /* মাথা একদম সোজা থাকবে, কোনোভাবেই বাঁকাবে না */
         .head { 
             width: 200px; height: 180px; background: #fff; 
-            border: 5px solid var(--line); 
-            border-radius: 55px; 
-            position: relative; z-index: 10; 
-            display: flex; flex-direction: column; align-items: center;
+            border: 5px solid var(--line); border-radius: 55px; 
+            position: relative; z-index: 10; display: flex; 
+            flex-direction: column; align-items: center;
             transform: none !important; 
         }
         
         .eyes { display: flex; justify-content: space-around; width: 100%; margin-top: 55px; padding: 0 25px; box-sizing: border-box; }
         .eye { width: 45px; height: 45px; background: var(--line); border-radius: 50%; position: relative; }
         .eye::after { content: ''; position: absolute; width: 10px; height: 10px; background: #fff; border-radius: 50%; top: 7px; right: 7px; }
-        
         .blink { transform: scaleY(0.1); }
 
-        /* মুখের বাস্তবসম্মত এনিমেশন - কথা চলাকালীন একটানা চলবে */
+        /* মুখের এনিমেশন - একটানা চলবে */
         .mouth { width: 45px; height: 6px; background: var(--line); margin-top: 35px; border-radius: 10px; transition: 0.1s; }
-        .talking { animation: mouthMove 0.18s infinite alternate ease-in-out !important; }
+        .talking { animation: mouthMove 0.18s infinite alternate !important; }
         @keyframes mouthMove { 
             0% { height: 6px; width: 45px; border-radius: 10px; } 
             100% { height: 24px; width: 35px; border-radius: 40%; } 
@@ -36,10 +33,8 @@
         
         .laughing { width: 50px; height: 25px; border-radius: 0 0 50px 50px; border: 4px solid var(--line); border-top: none; }
         .crying { width: 40px; height: 10px; border-radius: 20px 20px 0 0; border: 4px solid var(--line); border-bottom: none; }
-
         .body { width: 140px; height: 165px; background: #fff; border: 5px solid var(--line); border-radius: 40px 40px 20px 20px; margin-top: -10px; position: relative; }
         
-        /* ৫ আঙুলের হাত */
         .arm { position: absolute; top: 25px; width: 25px; height: 110px; background: #fff; border: 4px solid var(--line); border-radius: 15px; transform-origin: top center; transition: 0.4s; }
         .left { left: -40px; transform: rotate(18deg); }
         .right { right: -40px; transform: rotate(-18deg); }
@@ -47,7 +42,6 @@
         .hand { position: absolute; bottom: -40px; width: 60px; height: 50px; left: -18px; display: flex; justify-content: center; }
         .finger { width: 6px; height: 30px; background: var(--line); border-radius: 8px; margin: 0 1px; }
 
-        /* অ্যাকশন */
         .hands-up .left { transform: rotate(160deg); }
         .hands-up .right { transform: rotate(-160deg); }
         .scratch-head .right { transform: rotate(-155deg) translateY(-25px); animation: scratch 0.3s infinite; }
@@ -64,22 +58,8 @@
 <body>
 
     <div class="robot" id="leonRobot">
-        <div class="head">
-            <div class="eyes">
-                <div class="eye" id="lE"></div>
-                <div class="eye" id="rE"></div>
-            </div>
-            <div class="mouth" id="mth"></div>
-        </div>
-        <div class="body">
-            <div class="arm left" id="lA">
-                <div class="hand"><div class="finger"></div><div class="finger"></div><div class="finger"></div><div class="finger"></div><div class="finger"></div></div>
-            </div>
-            <div class="arm right" id="rA">
-                <div class="bullet" id="bullet"></div>
-                <div class="hand"><div class="finger"></div><div class="finger"></div><div class="finger"></div><div class="finger"></div><div class="finger"></div></div>
-            </div>
-        </div>
+        <div class="head"><div class="eyes"><div class="eye" id="lE"></div><div class="eye" id="rE"></div></div><div class="mouth" id="mth"></div></div>
+        <div class="body"><div class="arm left" id="lA"><div class="hand"><div></div><div></div><div></div><div></div><div></div></div></div><div class="arm right" id="rA"><div class="bullet" id="bullet"></div><div class="hand"><div></div><div></div><div></div><div></div><div></div></div></div></div>
     </div>
 
     <div id="status">লিওন আপনার অপেক্ষায়...</div>
@@ -87,17 +67,15 @@
 
     <script>
         const status = document.getElementById('status'), mth = document.getElementById('mth'), robot = document.getElementById('leonRobot');
-        const lE = document.getElementById('lE'), rE = document.getElementById('rE'), lA = document.getElementById('lA'), rA = document.getElementById('rA');
-        
         let speaking = false, recognition;
-        const viralDialogues = ["মাথা নষ্ট মামা!", "ওরে বাবা, এটা কী শুনলাম!", "খেলা হবে!", "অস্থির ভাই অস্থির!", "বিউটিফুল!", "একদম কোপাইয়া দিমু!", "মারাত্মক তো!", "সেই লেভেল ভাই!"];
 
         const brain = {
-            "নাম": "আমার নাম লিয়ন।",
+            "তোমার নাম": "আমার নাম লিয়ন।",
             "তুমি কে": "আমার নাম লিয়ন।",
+            "কে তুমি": "আমার নাম লিয়ন।",
             "তৈরি করেছে": "আমাকে রনি ভাই তৈরি করেছে।",
             "বানিয়েছে": "আমাকে রনি ভাই তৈরি করেছে।",
-            "বাড়ি": "আমার বাড়ি বাগেরহাটের চিতলমারী উপজেলায়।",
+            "বাড়ি": "আমার বাড়ি বাগেরহাটের চিতলমারী উপজেলায়।",
             "থাকো": "আমার বাড়ি বাগেরহাটের চিতলমারী উপজেলায়।",
             "ঠিকানা": "আমার বাড়ি বাগেরহাটের চিতলমারী উপজেলায়।",
             "রনি কে": "রনি তো সে যে আমাকে তৈরি করেছে।",
@@ -105,136 +83,110 @@
             "রনি কেমন": "রনি ভাইকেতো ভদ্রলোক বলে জানি, বাকিটা আল্লাহ জানে।",
             "কেমন আছো": "আলহামদুলিল্লাহ ভালো আছি, তুমি?",
             "কী অবস্থা": "এইতো আলহামদুলিল্লাহ, তোমার কী অবস্থা?",
-            "কী খবর": "এইতো আলহামদুলিল্লাহ, তোমার কী অবস্থা?",
-            "ধন্যবাদ": "তোমাকেও অনেক ধন্যবাদ! তুমি অনেক ভালো মানুষ।",
+            "কি খবর": "এইতো আলহামদুলিল্লাহ, তোমার কী অবস্থা?",
+            "ধন্যবাদ": "তোমাকেও অনেক ধন্যবাদ!",
             "সুন্দর": "ধন্যবাদ! প্রশংসা শুনতে কার না ভালো লাগে বলো?"
         };
 
         function activateLeon() {
             document.getElementById('startBtn').style.display = 'none';
-            speak("আসসালামু আলাইকুম! আমি লিওন। রনি ভাই আমাকে খুব ভালোবেসে আপনার জন্য তৈরি করেছে।");
-            startIdleLoop();
+            speak("আসসালামু আলাইকুম!");
             setupRecognition();
         }
 
+        // --- সমাধান ১: স্টপ কমান্ড এবং প্রশ্ন বোঝার লজিক ---
         function setupRecognition() {
             const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
             recognition = new SpeechRec();
             recognition.lang = 'bn-BD';
-            recognition.continuous = true;
-            recognition.interimResults = true; // দ্রুত স্টপ শোনার জন্য
+            recognition.continuous = false; // ফাইনাল রেজাল্টের পর নিজে থেকে থামবে
+            recognition.interimResults = false;
 
             recognition.onresult = (e) => {
-                let transcript = "";
-                for (let i = e.resultIndex; i < e.results.length; ++i) {
-                    transcript += e.results[i][0].transcript;
-                }
-                transcript = transcript.trim().toLowerCase();
-
-                // একবারে স্টপ কাজ করার লজিক
-                if(transcript.includes("স্টপ") || transcript.includes("থামো") || transcript.includes("stop")) {
+                const transcript = e.results[0][0].transcript.trim().toLowerCase();
+                status.innerText = "আপনি: " + transcript;
+                
+                if (transcript === "স্টপ" || transcript === "থামো") {
                     window.speechSynthesis.cancel();
-                    speaking = false;
-                    mth.classList.remove('talking');
-                    resetAnimations();
                     return;
                 }
                 
-                if(!speaking && e.results[e.results.length - 1].isFinal) {
-                    status.innerText = "আপনি: " + transcript;
+                if (!speaking) {
                     handleCommand(transcript);
                 }
             };
-
-            recognition.onend = () => { try { recognition.start(); } catch(e) {} };
+            
+            recognition.onend = () => {
+                // কথা না বললে বা বলার পর আবার শোনার জন্য প্রস্তুত
+                if (!speaking) {
+                    recognition.start();
+                }
+            };
+            
             recognition.start();
         }
 
+        // --- সমাধান ২: নির্ভুল উত্তর এবং ইন্টারনেট সার্চ ---
         async function handleCommand(q) {
-            resetAnimations();
-            
-            // ১. ব্রেন চেক (সরাসরি উত্তর)
-            for(let key in brain) {
-                if(q.includes(key.toLowerCase())) return speak(brain[key]);
+            // ইন-বিল্ট ব্রেন থেকে নিখুঁত উত্তর খোঁজা
+            let answer = null;
+            for (const key in brain) {
+                if (q.includes(key)) {
+                    answer = brain[key];
+                    break;
+                }
             }
 
-            // ২. স্পেশাল একশন
-            if(q.includes("লিয়ন") || q.includes("লিওন")) return speak("জী!");
-            if(q.includes("হ্যান্স আপ")) { robot.classList.add('hands-up'); return speak("ঠিক আছে, হাত জাগালাম!"); }
-            if(q.includes("হাসো")) { mth.className = 'mouth laughing'; return speak("হা হা হা!"); }
-            if(q.includes("কাঁদো")) { mth.className = 'mouth crying'; return speak("উ হু হু, আমি কাঁদছি।"); }
-            if(q.includes("গুলি")) { robot.classList.add('shoot-mode'); document.getElementById('bullet').style.display='block'; return speak("ডিসকাও! ডিসকাও!"); }
-            if(q.includes("গজল")) return speak("লা ইলাহা ইল্লাল্লাহ, মুহাম্মাদুর রাসুলুল্লাহ। সুবহানাল্লাহ, আলহামদুলিল্লাহ।");
+            if (answer) {
+                speak(answer);
+                return;
+            }
 
-            // ৩. ইন্টারনেট সার্চ (নিখুঁত লজিক)
+            // ইন্টারনেট সার্চ (শুধুমাত্র ব্রেনে উত্তর না পেলে)
             status.innerText = "ইন্টারনেটে খুঁজছি...";
             try {
                 const searchRes = await fetch(`https://bn.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(q)}&format=json&origin=*`);
                 const searchData = await searchRes.json();
-                
                 if (searchData.query.search.length > 0) {
                     const title = searchData.query.search[0].title;
                     const summaryRes = await fetch(`https://bn.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`);
                     const summaryData = await summaryRes.json();
-                    
-                    if(summaryData.extract) speak(summaryData.extract.split('.')[0] + "।");
-                    else speak("দুঃখিত, ইন্টারনেটে বিস্তারিত পেলাম না।");
+                    if (summaryData.extract) {
+                        speak(summaryData.extract.split('.')[0] + "।");
+                    } else {
+                        speak("দুঃখিত, এই বিষয়ে কিছু পেলাম না।");
+                    }
                 } else {
-                    speak("এই প্রশ্নের উত্তর আমার জানা নেই।");
+                    speak("দুঃখিত, এই বিষয়ে আমার জানা নেই।");
                 }
-            } catch(e) { 
-                // শুধুমাত্র নেট সমস্যা হলে একবার বলবে
-                speak("ইন্টারনেট কানেকশন চেক করুন।"); 
+            } catch (e) {
+                speak("ইন্টারনেট সংযোগে সমস্যা হচ্ছে।");
             }
         }
-
+        
+        // --- সমাধান ৩: মুখের এনিমেশন ও কথা বলা ---
         function speak(text) {
-            if(speaking) window.speechSynthesis.cancel();
             speaking = true;
+            window.speechSynthesis.cancel();
             
             const s = new SpeechSynthesisUtterance(text);
             s.lang = 'bn-BD';
-            s.pitch = 1.3; 
-            s.rate = 0.85; 
+            s.pitch = 1.2;
+            s.rate = 0.9;
             
-            s.onstart = () => { 
-                mth.classList.add('talking'); // মুখ নাড়ানো শুরু
-                lA.style.animation = "wave 0.5s infinite alternate";
-                rA.style.animation = "wave 0.5s infinite alternate reverse";
+            s.onstart = () => {
+                mth.classList.add('talking');
             };
             
-            s.onend = () => { 
-                mth.classList.remove('talking'); // কথা শেষ হলে মুখ স্থির
-                lA.style.animation = ""; rA.style.animation = "";
-                speaking = false; 
-                resetAnimations();
+            s.onend = () => {
+                mth.classList.remove('talking');
+                speaking = false;
+                // কথা শেষ হলে আবার শোনা শুরু
+                try { recognition.start(); } catch(e) {}
             };
             
             window.speechSynthesis.speak(s);
         }
-
-        function startIdleLoop() {
-            setInterval(() => {
-                if(!speaking) {
-                    const rand = Math.random();
-                    resetAnimations();
-                    if(rand < 0.2) { 
-                        robot.classList.add('scratch-head'); 
-                        speak(viralDialogues[Math.floor(Math.random()*viralDialogues.length)]); 
-                    }
-                    else if(rand < 0.4) { robot.classList.add('shoot-mode'); document.getElementById('bullet').style.display='block'; }
-                    else if(rand < 0.6) { lE.classList.add('blink'); rE.classList.add('blink'); setTimeout(() => { lE.classList.remove('blink'); rE.classList.remove('blink'); }, 200); }
-                    setTimeout(resetAnimations, 2500);
-                }
-            }, 5000);
-        }
-
-        function resetAnimations() {
-            robot.classList.remove('hands-up', 'scratch-head', 'shoot-mode');
-            if(!speaking) mth.className = 'mouth';
-            document.getElementById('bullet').style.display='none';
-        }
     </script>
-    <style> @keyframes wave { from { transform: rotate(10deg); } to { transform: rotate(40deg); } } </style>
 </body>
 </html>
