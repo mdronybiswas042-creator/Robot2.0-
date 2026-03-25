@@ -53,19 +53,17 @@
         const lE = document.getElementById('lE'), rE = document.getElementById('rE'), lA = document.getElementById('lA'), rA = document.getElementById('rA');
         
         let speaking = false, isProcessing = false, recognition;
-        
         const viralDialogues = ["মাথা নষ্ট মামা!", "খেলা হবে!", "অস্থির ভাই অস্থির!", "একদম কোপাইয়া দিমু!", "সেই লেভেল ভাই!"];
         const waitPhrases = ["দাঁড়াও তোমার প্রশ্নের উত্তরটা দিচ্ছি।", "একটু ভেবে নেই।", "একটু ওয়েট করো রনি ভাই।"];
 
-        // আপনার দেওয়া মূল প্রশ্ন-উত্তর
         const brain = [
-            {keys: ["নাম", "কে তুমি", "কে তুমি?"], ans: "আমার নাম লিয়ন।"},
+            {keys: ["নাম", "কে তুমি"], ans: "আমার নাম লিয়ন।"},
             {keys: ["তৈরি", "বানিয়েছে", "জন্ম"], ans: "আমাকে রনি ভাই তৈরি করেছে।"},
             {keys: ["বাড়ি", "থাকো", "ঠিকানা"], ans: "আমার বাড়ি বাগেরহাটের চিতলমারী উপজেলায়।"},
-            {keys: ["রনি কে", "রনি ভাই কে", "রনিকে চিনো"], ans: "রনি তো সে যে আমাকে তৈরি করেছে।"},
-            {keys: ["রনি কেমন", "রনি কেমন ছেলে"], ans: "রনি ভাইকেতো ভদ্রলোক বলে জানি, বাকিটা আল্লাহ জানে।"},
-            {keys: ["কেমন আছো", "কেমন আছ"], ans: "আলহামদুলিল্লাহ ভালো আছি, তুমি?"},
-            {keys: ["কি অবস্থা", "কী খবর", "কী খবর?"], ans: "এইতো আলহামদুলিল্লাহ, তোমার কী অবস্থা?"}
+            {keys: ["রনি কে", "রনি ভাই"], ans: "রনি তো সে যে আমাকে তৈরি করেছে।"},
+            {keys: ["রনি কেমন"], ans: "রনি ভাইকেতো ভদ্রলোক বলে জানি, বাকিটা আল্লাহ জানে।"},
+            {keys: ["কেমন আছো"], ans: "আলহামদুলিল্লাহ ভালো আছি, তুমি?"},
+            {keys: ["কি অবস্থা", "কী খবর"], ans: "এইতো আলহামদুলিল্লাহ, তোমার কী অবস্থা?"}
         ];
 
         function activateLeon() {
@@ -83,70 +81,77 @@
             recognition.interimResults = true; 
 
             recognition.onresult = (e) => {
-                let transcript = Array.from(e.results).map(result => result[0].transcript).join('').toLowerCase();
+                let transcript = e.results[e.results.length - 1][0].transcript.toLowerCase().trim();
                 
+                // ১. স্টপ কমান্ড সবসময় কাজ করবে
                 if (transcript.includes("থামো") || transcript.includes("স্টপ") || transcript.includes("stop")) {
                     window.speechSynthesis.cancel();
                     speaking = false; isProcessing = false;
-                    mth.classList.remove('talking');
                     resetAnimations();
                     return;
                 }
 
-                if (e.results[e.results.length - 1].isFinal && !speaking && !isProcessing) {
-                    let q = e.results[e.results.length - 1][0].transcript.trim();
-                    status.innerText = "আপনি: " + q;
-                    handleCommand(q);
+                // ২. যদি সে কথা বলতে থাকে, তবে সে অন্য কিছু শুনবে না (কিন্তু স্টপ কমান্ড শুনবে)
+                if (speaking || isProcessing) return;
+
+                // ৩. শুধুমাত্র ফাইনাল রেজাল্ট এবং ছোট শব্দ (নয়েজ) এড়িয়ে চলা
+                if (e.results[e.results.length - 1].isFinal && transcript.length > 2) {
+                    status.innerText = "আপনি: " + transcript;
+                    handleCommand(transcript);
                 }
             };
             
-            recognition.onend = () => { recognition.start(); };
+            recognition.onend = () => { try { recognition.start(); } catch(e) {} };
             recognition.start();
         }
 
         async function handleCommand(q) {
             isProcessing = true;
-            let lowerQ = q.toLowerCase();
-
-            // ১. আপনার ডাটাবেস চেক (এখানে কোনো "দাঁড়াও" বলবে না)
-            let found = brain.find(item => item.keys.some(k => lowerQ.includes(k.toLowerCase())));
+            // আপনার ব্রেইন ডাটাবেস চেক (সরাসরি উত্তর)
+            let found = brain.find(item => item.keys.some(k => q.includes(k)));
+            
             if (found) {
                 speak(found.ans);
                 isProcessing = false;
                 return;
             }
 
-            // ২. প্রশংসা চেক
-            if (lowerQ.includes("সুন্দর") || lowerQ.includes("ভালো") || lowerQ.includes("ধন্যবাদ")) {
+            // যদি প্রশংসা হয়
+            if (q.includes("সুন্দর") || q.includes("ভালো") || q.includes("ধন্যবাদ")) {
                 speak("ধন্যবাদ রনি ভাই!");
                 isProcessing = false; return;
             }
 
-            // ৩. ইন্টারনেট সার্চ (এখানে "দাঁড়াও ভাবছি" বলবে কারণ সময় লাগে)
-            status.innerText = "খুঁজছি...";
+            // ইন্টারনেট সার্চ (এখানে "দাঁড়াও" বলবে)
+            status.innerText = "ইন্টারনেটে খুঁজছি...";
             robot.classList.add('thinking-pose');
-            await speakWait(); // শুধু ইন্টারনেটের জন্য ওয়েট ফ্রেজ
-
-            try {
-                const res = await fetch(`https://bn.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(q)}`);
-                const data = await res.json();
-                if (data.extract) {
-                    speak(data.extract.split('।')[0] + "।");
-                } else {
-                    speak("রনি ভাই, এই প্রশ্নের উত্তর আমার জানা নেই।");
-                }
-            } catch(e) { speak("ইন্টারনেট কানেকশন দুর্বল রনি ভাই।"); }
-            isProcessing = false;
-        }
-
-        function speakWait() {
-            return new Promise(resolve => {
+            
+            // ওয়েট ফ্রেজ বলা
+            await new Promise(resolve => {
                 const phrase = waitPhrases[Math.floor(Math.random() * waitPhrases.length)];
                 const s = new SpeechSynthesisUtterance(phrase);
                 s.lang = 'bn-BD';
                 s.onend = resolve;
                 window.speechSynthesis.speak(s);
             });
+
+            try {
+                // উইকিপিডিয়া সার্চ লজিক
+                const res = await fetch(`https://bn.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(q)}&format=json&origin=*`);
+                const data = await res.json();
+                
+                if (data.query.search.length > 0) {
+                    const title = data.query.search[0].title;
+                    const summaryRes = await fetch(`https://bn.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`);
+                    const summaryData = await summaryRes.json();
+                    speak(summaryData.extract ? summaryData.extract.split('।')[0] + "।" : "দুঃখিত রনি ভাই, ইন্টারনেটে বিস্তারিত পেলাম না।");
+                } else {
+                    speak("রনি ভাই, এই প্রশ্নের উত্তর আমার জানা নেই।");
+                }
+            } catch(e) {
+                speak("ইন্টারনেট কানেকশনে সমস্যা হচ্ছে রনি ভাই।");
+            }
+            isProcessing = false;
         }
 
         function speak(text) {
@@ -176,12 +181,13 @@
                     else if(r < 0.5) { lE.classList.add('blink'); rE.classList.add('blink'); }
                     setTimeout(resetAnimations, 3000);
                 }
-            }, 9000);
+            }, 10000); // ৮-১০ সেকেন্ড পর পর আইডিয়াল অ্যাকশন
         }
 
         function resetAnimations() {
             robot.classList.remove('scratch-head', 'shoot-mode', 'thinking-pose');
             lE.classList.remove('blink'); rE.classList.remove('blink');
+            if(!speaking) mth.className = "mouth";
         }
     </script>
     <style> @keyframes talk { from { transform: rotate(10deg); } to { transform: rotate(40deg); } } </style>
