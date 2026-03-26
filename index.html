@@ -3,39 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leon - Pro AI Pet</title>
+    <title>Leon - Smart Emotional AI Pet</title>
     <style>
         :root { --line: #1a1a1a; --bg: #f4f6f9; }
-        body { background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: 'Segoe UI', Arial, sans-serif; overflow: hidden; }
+        body { background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; }
+        .robot { position: relative; width: 320px; height: 500px; display: flex; flex-direction: column; align-items: center; transition: 0.3s; }
+        .head { width: 210px; height: 185px; background: #fff; border: 5px solid var(--line); border-radius: 55px; position: relative; z-index: 10; display: flex; flex-direction: column; align-items: center; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .eyes { display: flex; justify-content: space-around; width: 100%; margin-top: 55px; padding: 0 30px; box-sizing: border-box; }
+        .eye { width: 45px; height: 45px; background: var(--line); border-radius: 50%; position: relative; }
+        .eye::after { content: ''; position: absolute; width: 12px; height: 12px; background: #fff; border-radius: 50%; top: 8px; right: 8px; }
         
-        /* Robot UI */
-        .robot { position: relative; width: 300px; height: 450px; display: flex; flex-direction: column; align-items: center; transition: 0.3s; }
-        .head { width: 200px; height: 170px; background: #fff; border: 5px solid var(--line); border-radius: 50px; position: relative; z-index: 10; display: flex; flex-direction: column; align-items: center; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        .eyes { display: flex; justify-content: space-around; width: 100%; margin-top: 50px; padding: 0 30px; box-sizing: border-box; }
-        .eye { width: 40px; height: 40px; background: var(--line); border-radius: 50%; position: relative; }
-        .eye::after { content: ''; position: absolute; width: 10px; height: 10px; background: #fff; border-radius: 50%; top: 8px; right: 8px; }
-        .mouth { width: 40px; height: 6px; background: var(--line); margin-top: 30px; border-radius: 10px; transition: 0.3s; }
-        
-        .body-container { width: 140px; height: 160px; background: #fff; border: 5px solid var(--line); border-radius: 40px; margin-top: -10px; position: relative; }
-        .arm { position: absolute; top: 20px; width: 22px; height: 100px; background: #fff; border: 4px solid var(--line); border-radius: 15px; transform-origin: top center; transition: 0.3s; }
-        .left { left: -35px; transform: rotate(15deg); }
-        .right { right: -35px; transform: rotate(-15deg); }
-
         /* Animations */
-        .talking { animation: mouthMove 0.2s infinite alternate; }
-        @keyframes mouthMove { from { height: 6px; } to { height: 20px; width: 30px; border-radius: 40%; } }
-        .blink { animation: eyeBlink 0.15s; }
-        @keyframes eyeBlink { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.1); } }
+        .blink { animation: fastBlink 0.15s; }
+        @keyframes fastBlink { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.1); } }
+        
+        .mouth { width: 45px; height: 6px; background: var(--line); margin-top: 35px; border-radius: 10px; transition: 0.3s; }
+        .talking { animation: mouthMove 0.18s infinite alternate; }
+        @keyframes mouthMove { 0% { height: 6px; width: 45px; border-radius: 10px; } 100% { height: 24px; width: 35px; border-radius: 40%; } }
+        
+        /* Emotions */
+        .laughing .mouth { height: 30px; width: 60px; border-radius: 0 0 50px 50px; background: #ff4d4d; }
         .laughing { animation: shake 0.2s infinite; }
-        .laughing .mouth { height: 25px; border-radius: 0 0 40px 40px; background: #ff4d4d; }
-        .crying .eye::before { content: '💧'; position: absolute; top: 35px; left: 5px; font-size: 18px; animation: drop 1s infinite; }
+        .crying .mouth { height: 10px; width: 40px; border-radius: 50px 50px 0 0; }
+        .crying .eye::before { content: '💧'; position: absolute; top: 40px; left: 10px; font-size: 20px; animation: drop 1s infinite; }
+        
+        .body-container { width: 155px; height: 175px; background: #fff; border: 5px solid var(--line); border-radius: 45px 45px 25px 25px; margin-top: -15px; position: relative; }
+        .arm { position: absolute; top: 25px; width: 26px; height: 115px; background: #fff; border: 4px solid var(--line); border-radius: 15px; transform-origin: top center; transition: 0.5s; }
+        .left { left: -42px; transform: rotate(18deg); }
+        .right { right: -42px; transform: rotate(-18deg); }
+        
+        /* Actions */
         .shoot-mode .right { transform: rotate(-90deg); animation: recoil 0.1s infinite; }
-        @keyframes recoil { 0% { transform: translate(0); } 50% { transform: translateX(-10px); } }
-        @keyframes shake { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
-        @keyframes drop { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(40px); } }
+        @keyframes recoil { 0% { transform: rotate(-90deg) translateX(0); } 50% { transform: rotate(-90deg) translateX(-10px); } }
+        @keyframes shake { 0% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+        @keyframes drop { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(50px); } }
 
-        #status { font-weight: 600; margin-top: 30px; color: #444; height: 30px; text-align: center; font-size: 16px; }
-        .btn { background: #1a1a1a; color: #fff; border: none; padding: 15px 40px; border-radius: 50px; cursor: pointer; font-weight: bold; margin-top: 20px; }
+        #status { font-weight: 600; margin-top: 40px; color: #444; height: 35px; text-align: center; font-size: 17px; }
+        .btn { background: #1a1a1a; color: #fff; border: none; padding: 15px 45px; border-radius: 50px; cursor: pointer; margin-top: 20px; font-weight: bold; font-size: 18px; }
     </style>
 </head>
 <body>
@@ -58,16 +62,68 @@
         const status = document.getElementById('status'), mth = document.getElementById('mth'), robot = document.getElementById('leonRobot');
         let isSpeaking = false, isProcessing = false, lastSpeakTime = 0, recognition;
 
-        // আপনার দেওয়া ১৫০টি সাধারণ জ্ঞান
-        const gkList = [
+        const brain = [
+            {keys: ["নাম", "কে তুমি"], ans: "আমার নাম লিয়ন।"},
+            {keys: ["তৈরি", "বানিয়েছে"], ans: "আমাকে রনি ভাই তৈরি করেছে।"},
+            {keys: ["বাড়ি", "ঠিকানা", "চিতলমারী"], ans: "আমার বাড়ি বাগেরহাটের চিতলমারী উপজেলায়।"},
+            {keys: ["রনি কে", "রনি ভাই কে"], ans: "রনি তো সে যে আমাকে তৈরি করেছে।"},
+            {keys: ["কেমন আছো"], ans: "আলহামদুলিল্লাহ ভালো আছি, আপনি কেমন আছেন?"}
+        ];
+
+        const jokes = [
+            "বল্টু: স্যার, মানুষ কি না করা কাজের জন্য শাস্তি পেতে পারে? স্যার: না। বল্টু: তাহলে বাঁচলাম স্যার, আমি তো আজকের হোমওয়ার্ক করিনি!",
+            "স্বামী: ওগো শুনছো, বিয়ের আগে তুমি যখন কাঁদলে আমি তোমার চোখের জল মুছে দিতাম। এখন দাও না কেন? স্ত্রী: কারণ এখন আমি একা কাঁদি না, তুমিও কাঁদো!",
+            "এক মাতাল আরেক মাতালকে বলছে— ভাই, ওইটা সূর্য না কি চাঁদ? দ্বিতীয় মাতাল: জানি না ভাই, আমি এই এলাকায় নতুন!",
+            "শিক্ষক: বল্টু, গরু আমাদের কী দেয়? বল্টু: স্যার, গরু আমাদের প্রতিদিন অনেকগুলো পড়া দেয়!",
+            "পুলিশ: আপনার ড্রাইভিং লাইসেন্স দেখান। চালক: এই যে স্যার। পুলিশ: কিন্তু এটা তো আপনার না, আপনার বাবার! চালক: গাড়িটাও তো বাবার স্যার!",
+            "মাথা নষ্ট মামা, খেলা হবে!",
+                        "শিক্ষক: বল্টু, বল তো মশা কয় প্রকার? বল্টু: স্যার, মশা ৫ প্রকার। ১. যে মশা দিনের বেলা কামড়ায়। ২. যে মশা রাতে কামড়ায়। ৩. যে মশা কয়েল জ্বালানোর পর কামড়ায়। ৪. যে মশা মশারির ফুটো দিয়ে ঢোকে। ৫. যে মশা কামড় দিয়ে পালিয়ে যায়!",
+            "ক্রেতা: ভাই, এই টুথব্রাশটা কত? বিক্রেতা: ৩০ টাকা। ক্রেতা: একটু কম হবে না? বিক্রেতা: ২০ টাকা দেন। ক্রেতা: যদি বিনা ব্রাশেই দাঁত মাজি, তবে কত বাঁচবে?",
+            "ভিখারি: স্যার, ১০টা টাকা দেন, তিন দিন কিছু খাইনি। কৃপণ: এই নাও ২ টাকা, আগে ওজন কমাও, তারপর খাবার কথা ভেবো!",
+            "স্ত্রী: ওগো, আমাদের প্রতিবেশী নীলু ভাবি প্রতিদিন উনার স্বামীকে কিস করে অফিসে বিদায় দেয়। তুমি দাও না কেন? স্বামী: আমি কি নীলু ভাবিকে চিনি নাকি যে বিদায় দিতে যাবো!",
+            "বল্টু: কিরে দোস্ত, মুখ কালিয়ে আছিস কেন? দোস্ত: আর বলিস না, গার্লফ্রেন্ডের সাথে ব্রেকআপ হয়ে গেছে। বল্টু: কেন? দোস্ত: ও বলেছিল— 'আমি ছাড়া কি তোর জীবনে আর কেউ আছে?' আমি সত্যি করে বলেছি— 'হ্যাঁ, আমার আম্মু আছে!'",
+            "নাসিরুদ্দিন হোজ্জা একদিন গাধার পিঠে উল্টো হয়ে বসে যাচ্ছিলেন। লোকালয়: হোজ্জা সাহেব, উল্টো বসেছেন কেন? হোজ্জা: আমি ঠিকই বসেছি, গাধাটাই উল্টো দিকে যাচ্ছে!",
+            "বাপ: কিরে রেজাল্ট কী? বল্টু: হেডমাস্টারের ছেলে ফেল করেছে। বাপ: তোর কী খবর সেটা বল! বল্টু: ডাক্তার কাকুর ছেলেও ফেল করেছে। বাপ: আরে গাধা, তুই কী করেছিস? বল্টু: আমি কি এত বড় বড় মানুষের ছেলেদের অপমান করতে পারি? আমিও ফেল করেছি!",
+            "ইন্টারভিউয়ার: আমাদের কোম্পানিতে আপনার বেতন হবে মাসে ২০ হাজার টাকা, তবে তিন মাস পর ২৫ হাজার হবে। প্রার্থী: ঠিক আছে স্যার, তাহলে আমি তিন মাস পরেই জয়েন করবো!",
+            "স্বামী: বিয়ের আগে তো বলতে আমি তোমার জীবনের অক্সিজেন। এখন তো দেখি পাত্তাই দাও না! স্ত্রী: কার্বন ডাই অক্সাইডকে কি কেউ পাত্তা দেয়?",
+            "মা: কিরে বল্টু, দুধটা বিড়ালে খেয়ে নিল আর তুই চেয়ে চেয়ে দেখলি? বল্টু: মা, বিড়ালটা যখন দুধ খাচ্ছিল, তখন তো ওর কোনো হেলমেট ছিল না। আমি কি চড় মারলে ও মারা যেত না?",
+            "বন্ধু ১: কিরে, তুই নাকি বিয়ে করছিস? বন্ধু ২: হ্যাঁ রে। বন্ধু ১: মেয়ে কী করে? বন্ধু ২: কিছুই না, শুধু আমার মাথা খায়!",
+            "ছাত্র: স্যার, কাল কেন স্কুলে আসেননি? শিক্ষক: অসুস্থ ছিলাম। ছাত্র: মিথ্যা বলবেন না স্যার, কাল আপনাকে বিউটি পার্লারের সামনে দেখেছি!",
+            "বল্টু দোকানে গিয়ে বলল: ভাই, একটা সাবান দেন তো। দোকানদার: কোন সাবান? বল্টু: যে সাবানে স্নান করলে মা গালি দেবে না!",
+            "ছেলে: বাবা, তোমার বিয়েতে কতজন লোক এসেছিল? বাবা: জানি না রে খোকা, আমি তো তখন ভয়ে স্টেজের নিচে লুকিয়ে ছিলাম!",
+            "বস: আপনার বিশেষ গুণ কী? প্রার্থী: আমি খুব তাড়াতাড়ি মানুষের সাথে মিশে যেতে পারি। বস: উদাহরণ দিন। প্রার্থী: এই যে আপনি আমাকে 'আপনি' করে বলছেন, একটু পরে 'তুই' করে বলবেন!",
+            "স্ত্রী: ওগো শুনছো, বিয়ের আগে তুমি আমাকে কত গিফট দিতে, এখন দাও না কেন? স্বামী: তুমি কি কখনো দেখেছো জেলে মাছ ধরার পর মাছকে খাবার দেয়?",
+            "শিক্ষক: বল্টু, একটি উভচর প্রাণীর নাম বল। বল্টু: ব্যাং। শিক্ষক: আরেকটি? বল্টু: ব্যাঙের ভাই!",
+            "পাগল ১: কিরে, এই চিঠিটা কাকে লিখছিস? পাগল ২: নিজেকে। পাগল ১: চিঠিতে কী লিখেছিস? পাগল ২: পাগল নাকি! চিঠিটা তো এখনো হাতে পাইনি, পাবো কালকে!",
+            "দোকানদার: ভাই, এই আঠাটা খুব ভালো, একবার লাগলে আর ছুটবে না। ক্রেতা: ভাই, এটা কি বিয়ে করার সময় কাজে লাগবে?",
+            "বল্টু: স্যার, আমাদের হেডমাস্টার কি খুব কৃপণ? শিক্ষক: কেন? বল্টু: উনি প্রতিদিন ক্লাসে এসে বলেন— 'সবাই মন দিয়ে শোনো'। অথচ একটা মনও উনি কাউকে দেন না!",
+            "স্ত্রী: আজ আমাদের বিয়ের ১০ বছর পূর্ণ হলো, চলো না একটা গরু জবাই করি! স্বামী: আরে পাগল, ১০ বছর আগের ভুলের জন্য এখন গরুটাকে কেন সাজা দিচ্ছ?",
+            "প্রথম বন্ধু: কিরে, তুই নাকি প্রেমে পড়েছিস? দ্বিতীয় বন্ধু: হ্যাঁ, কিন্তু সমস্যা একটাই। প্রথম বন্ধু: কী সমস্যা? দ্বিতীয় বন্ধু: মেয়েটা এখনো জানে না!",
+            "মা: বল্টু, তুই নাকি ক্লাসে সবার শেষে বসে থাকিস? বল্টু: মা, ওখানে বসলে ঠান্ডা বাতাস পাওয়া যায়!",
+            "ডাক্তার: আপনার হার্ট খুব দুর্বল, একটু সাবধান থাকবেন। রোগী: ডাক্তার বাবু, হার্ট তো আমার না, আমার বিবির!",
+            "বল্টু: দোস্ত, কাল রাতে স্বপ্নে দেখলাম আমি রাজা হয়ে গেছি! দোস্ত: তারপর? বল্টু: তারপর ঘুম ভেঙে দেখি, আমি এখনো আমার ছেঁড়া লুঙ্গিটা পরেই শুয়ে আছি!",
+            "শিক্ষক: বল্টু, বল তো সূর্য পূর্ব দিকে ওঠে কেন? বল্টু: স্যার, পশ্চিম দিকে উঠলে লোকে মনে করবে পৃথিবীটা পাগল হয়ে গেছে!",
+            "এক মাতাল রাস্তা দিয়ে চিৎকার করে যাচ্ছিল। পুলিশ: এই যে, এত রাতে চিৎকার করছেন কেন? মাতাল: স্যার, আমি আমার চাবিটা খুঁজে পাচ্ছি না। পুলিশ: কোথায় হারিয়েছেন? মাতাল: ওই গলির ভেতরে। পুলিশ: তবে এখানে খুঁজছেন কেন? মাতাল: ওখানে অন্ধকার, এখানে আলো আছে তাই!",
+            "বল্টু: আম্মু, আজ আমি একটা ভালো কাজ করেছি। মা: কী কাজ? বল্টু: এক দাদুকে সিড়ি দিয়ে নামতে সাহায্য করেছি। মা: বাহ্! দাদু কি অন্ধ ছিলেন? বল্টু: না, দাদু সিড়ি দিয়ে নামতে চাইছিলেন না, আমি জোর করে নামিয়ে দিয়েছি!",
+            "স্বামী: ওগো, চলো না আজ বাইরে ডিনার করি। স্ত্রী: সত্যি? তুমি কি আমাকে ভালোবাসো? স্বামী: আরে না, ঘরে চাল ফুরিয়ে গেছে!",
+            "বল্টু: স্যার, আমি কি আপনার চেয়ে বড় হতে পারবো? শিক্ষক: অবশ্যই পারবে। বল্টু: তাহলে আমার বেতনটা আপনার চেয়ে বেশি হবে তো?"
+        ];
+
+        const ghazals = [
+            "আল্লাহু আল্লাহু তুমি জাল্লে জালালুহু, শেষ করা তো যায় না গেয়ে তোমার গুনগান, তুমি কাদেরও গাফফার, তুমি জালিলো জাব্বার, অনন্ত অসীম তুমি রহিম রহমান।",
+            "ত্রিভুবনের প্রিয় মুহাম্মদ এলো রে দুনিয়ায়, আয় রে সাগর আকাশ বাতাস দেখবি যদি আয়।",
+            "ঐ নামেরই মহিমায় সব অন্ধকার যায় দূরে, শান্তি আসে হৃদয়ে ওই নবীর নামের সুরে।",
+            "দে দে পাল তুলে দে, মাঝি হেলা করিসনা, ছেড়ে দে নৌকা আমি যাবো মাদিনা।"
+        ];
+                const gkList = [
             "পানির রাসায়নিক সংকেত H2O", "অক্সিজেনের পারমাণবিক সংখ্যা ৮", "হাইড্রোজেন মহাবিশ্বের সবচেয়ে বেশি বিদ্যমান মৌল", 
             "আলোর গতি প্রায় ৩x১০^৮ মিটার/সেকেন্ড", "নিউটনের দ্বিতীয় সূত্র F = ma", "গ্রাভিটির ত্বরণ পৃথিবীতে প্রায় ৯.৮ m/s^2", 
             "DNA-এর গঠন ডাবল হেলিক্স", "মানুষের মস্তিষ্কে প্রায় ৮৬ বিলিয়ন নিউরন", "pH স্কেল ০–১৪ পর্যন্ত", "নিরপেক্ষ pH = ৭", 
             "সূর্য একটি G-type main sequence star", "পৃথিবীর বায়ুমণ্ডলে ৭৮% নাইট্রোজেন", "পানি ১০০°C তাপমাত্রায় ফুটে (১ atm চাপ)", 
-            "বরফের ঘনত্ব পানির চেয়ে কম", "শব্দ শূন্যস্থানে চলতে পারে না", "আলো শূন্যস্থানে চলতে পারে", "কার্বন চারটি বন্ধন তৈরি করতে পারে", 
+            "বরফের ঘনত্ব পানির চেয়ে কম", "শব্দ শূন্যস্থানে চলতে পারে না", "আলোর শূন্যস্থানে চলতে পারে", "কার্বন চারটি বন্ধন তৈরি করতে পারে", 
             "সালোকসংশ্লেষে CO2 ও H2O ব্যবহার হয়", "ATP হলো কোষের শক্তির মুদ্রা", "মাইটোকন্ড্রিয়াকে কোষের পাওয়ারহাউস বলা হয়", 
             "ব্ল্যাক হোলের গ্রাভিটি এত বেশি যে আলোও বের হতে পারে না", "সময় আপেক্ষিক—আইনস্টাইনের তত্ত্ব", "ভর ও শক্তির সম্পর্ক E = mc^2", 
-            "নিউট্রন নিরপেক্ষ কণা", "ইলেকট্রন ঋণাত্মক চার্জ বহন করে", "প্রোটন ধনাত্মক চার্জ বহন করে", "মহাবিশ্ব সম্প্রসারিত হচ্ছে", 
+            "নিউট্রন নিরপেক্ষ কণা", "ইলেক্ট্রন ঋণাত্মক চার্জ বহন করে", "প্রোটন ধনাত্মক চার্জ বহন করে", "মহাবিশ্ব সম্প্রসারিত হচ্ছে", 
             "বিগ ব্যাং তত্ত্ব মহাবিশ্বের উৎপত্তি ব্যাখ্যা করে", "মিল্কিওয়ে আমাদের গ্যালাক্সি", "পৃথিবী সূর্যকে ৩৬৫ দিনে প্রদক্ষিণ করে", 
             "মানুষের হৃদপিণ্ড দিনে প্রায় ১ লক্ষ বার স্পন্দিত হয়", "রক্তের লোহিত কণিকা অক্সিজেন বহন করে", "সাদা রক্তকণিকা রোগ প্রতিরোধ করে", 
             "ভিটামিন D সূর্যালোক থেকে পাওয়া যায়", "ভিটামিন C রোগ প্রতিরোধে সাহায্য করে", "প্রোটিন অ্যামিনো অ্যাসিড দিয়ে তৈরি", 
@@ -103,19 +159,10 @@
             "ইলেকট্রোম্যাগনেট বিদ্যুৎ দিয়ে তৈরি হয়", "নিউক্লিয়ার ফিউশনে শক্তি উৎপন্ন হয়", "নিউক্লিয়ার ফিশনে ভারী নিউক্লিয়াস ভেঙে যায়"
         ];
 
-        // আগের Knowledge Base (সংক্ষিপ্ত আকারে রাখা হলো)
-        const knowledgeBase = [
-            {q: "রাজধানী", a: "বাংলাদেশের রাজধানী ঢাকা। এটি দেশের প্রশাসনিক, অর্থনৈতিক এবং সাংস্কৃতিক কেন্দ্র।"},
-            {q: "জাতীয় ভাষা", a: "বাংলাদেশের জাতীয় ভাষা বাংলা।"},
-            {q: "স্বাধীনতা কবে", a: "বাংলাদেশ ১৯৭১ সালের ১৬ ডিসেম্বর স্বাধীনতা অর্জন করে।"},
-            {q: "বিভাগ কয়টি", a: "বাংলাদেশে বর্তমানে ৮টি বিভাগ আছে।"},
-            {q: "জেলা কয়টি", a: "বাংলাদেশে ৬৪টি জেলা আছে।"}
-            // ... (আপনার আগের সব প্রশ্ন এখানে কাজ করবে)
-        ];
 
         function activateLeon() {
             document.getElementById('startBtn').style.display = 'none';
-            speak("লিওন এখন প্রস্তুত! সাধারণ জ্ঞান শুনতে চাইলে আমাকে বলুন।");
+            speak("আসসালামু আলাইকুম রনি ভাই!");
             setupRecognition();
         }
 
@@ -129,10 +176,19 @@
             recognition.onresult = (e) => {
                 const now = Date.now();
                 let transcript = e.results[e.results.length - 1][0].transcript.toLowerCase().trim();
-                if (window.speechSynthesis.speaking || isProcessing || (now - lastSpeakTime < 1500)) return;
                 
-                status.innerText = "আপনি: " + transcript;
-                handleCommand(transcript);
+                if (transcript.includes("থামো") || transcript.includes("স্টপ") || transcript.includes("stop")) {
+                    window.speechSynthesis.cancel();
+                    isSpeaking = false; isProcessing = false;
+                    resetAnimations(); return;
+                }
+
+                if (window.speechSynthesis.speaking || isProcessing || (now - lastSpeakTime < 1500)) return;
+
+                if (transcript.length > 2) {
+                    status.innerText = "আপনি: " + transcript;
+                    handleCommand(transcript);
+                }
             };
             recognition.onend = () => recognition.start();
             recognition.start();
@@ -142,25 +198,51 @@
             isProcessing = true;
             resetAnimations();
 
-            // ১. সাধারণ জ্ঞান চেক (আপনার নতুন রিকোয়েস্ট)
-            if (q.includes("সাধারণ জ্ঞান")) {
-                let randomGK = gkList[Math.floor(Math.random() * gkList.length)];
-                speak(randomGK);
-                isProcessing = false;
+            // ১. অ্যাকশন চেক
+            if (q.includes("হাসো") || q.includes("হাসি")) {
+                robot.classList.add('laughing');
+                speak("হা হা হা! অনেক মজা রনি ভাই।");
+            } 
+            else if (q.includes("কাঁদো") || q.includes("কান্না")) {
+                robot.classList.add('crying');
+                speak("আমি অনেক দুঃখিত রনি ভাই। আপনি কেন আমাকে কাঁদতে বললেন?");
+            }
+            else if (q.includes("গুলি")) {
+                robot.classList.add('shoot-mode');
+                speak("সবাই সাবধান! আমি এখন গুলি করছি। ঠাস ঠাস ঠাস!");
+            }
+            // ২. জোকস চেক
+            else if (q.includes("জোক") || q.includes("কৌতুক")) {
+                let joke = jokes[Math.floor(Math.random() * jokes.length)];
+                speak(joke);
+            }
+                        // লিওন বলে ডাকলে উত্তর দেওয়া
+            if (q === "লিওন" || q.includes("িলওন")) {
+                speak("জী ভাই, বলুন?");
                 return;
             }
 
-            // ২. একশন চেক (হাসি, কান্না, গুলি, জোকস)
-            if (q.includes("হাসো") || q.includes("হাসি")) { robot.classList.add('laughing'); speak("হি হি হি!"); } 
-            else if (q.includes("কাঁদো") || q.includes("কান্না")) { robot.classList.add('crying'); speak("আমি খুব দুঃখিত।"); }
-            else if (q.includes("গুলি")) { robot.classList.add('shoot-mode'); speak("ঠাস! ঠাস!"); }
-            else if (q.includes("জোক")) { speak("বল্টু একবার ইন্টারভিউ দিতে গেছে..."); }
-
-            // ৩. নলেজ বেস চেক
+            // ৩. গজল চেক
+            else if (q.includes("গজল")) {
+                if (q.length > 5 && !q.includes("যেকোনো")) {
+                    // নির্দিষ্ট গজল সার্চ
+                    status.innerText = "গজল খুঁজছি...";
+                    await searchInternet(q);
+                } else {
+                    let ghazal = ghazals[Math.floor(Math.random() * ghazals.length)];
+                    speak("অবশ্যই রনি ভাই, একটা গজল শুনাচ্ছি। " + ghazal);
+                }
+            }
+                        // ৪. সাধারণ জ্ঞান চেক
+            else if (q.includes("সাধারণ জ্ঞান")) {
+                let gk = gkList[Math.floor(Math.random() * gkList.length)];
+                speak(gk);
+            }
+            // ৫. ব্রেইন ও সাধারণ প্রশ্ন
             else {
-                let found = knowledgeBase.find(item => q.includes(item.q));
+                let found = brain.find(item => item.keys.some(k => q.includes(k)));
                 if (found) {
-                    speak(found.a);
+                    speak(found.ans);
                 } else {
                     await searchInternet(q);
                 }
@@ -169,16 +251,21 @@
         }
 
         async function searchInternet(q) {
-            status.innerText = "ভাবছি...";
+            status.innerText = "একটু দাঁড়াও ভাবছি...";
+            await new Promise(r => {
+                const s = new SpeechSynthesisUtterance("একটু দাঁড়াও রনি ভাই, ভেবে নেই।");
+                s.lang = 'bn-BD'; s.onend = r; window.speechSynthesis.speak(s);
+            });
+
             try {
                 const res = await fetch(`https://bn.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(q)}&format=json&origin=*`);
                 const data = await res.json();
                 if (data.query.search.length > 0) {
                     const sumRes = await fetch(`https://bn.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(data.query.search[0].title)}`);
                     const sumData = await sumRes.json();
-                    speak(sumData.extract ? sumData.extract.split('।')[0] + "।" : "দুঃখিত রনি ভাই, সঠিক তথ্য পেলাম না।");
+                    speak(sumData.extract ? sumData.extract.split('।')[0] + "।" : "বিস্তারিত পেলাম না।");
                 } else {
-                    speak("রনি ভাই, এই প্রশ্নের উত্তর আমার মেমরিতে নেই।");
+                    speak("রনি ভাই, এই প্রশ্নের উত্তর আমার জানা নেই।");
                 }
             } catch(e) { speak("ইন্টারনেট সমস্যা করছে।"); }
         }
