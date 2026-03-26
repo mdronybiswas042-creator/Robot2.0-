@@ -7,24 +7,37 @@
     <style>
         :root { --line: #1a1a1a; --bg: #f4f6f9; }
         body { background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; }
-        .robot { position: relative; width: 320px; height: 500px; display: flex; flex-direction: column; align-items: center; }
+        .robot { position: relative; width: 320px; height: 500px; display: flex; flex-direction: column; align-items: center; transition: 0.3s; }
         .head { width: 210px; height: 185px; background: #fff; border: 5px solid var(--line); border-radius: 55px; position: relative; z-index: 10; display: flex; flex-direction: column; align-items: center; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         .eyes { display: flex; justify-content: space-around; width: 100%; margin-top: 55px; padding: 0 30px; box-sizing: border-box; }
         .eye { width: 45px; height: 45px; background: var(--line); border-radius: 50%; position: relative; }
         .eye::after { content: ''; position: absolute; width: 12px; height: 12px; background: #fff; border-radius: 50%; top: 8px; right: 8px; }
+        
+        /* Animations */
         .blink { animation: fastBlink 0.15s; }
         @keyframes fastBlink { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.1); } }
-        .mouth { width: 45px; height: 6px; background: var(--line); margin-top: 35px; border-radius: 10px; transition: 0.1s; }
-        .talking { animation: mouthMove 0.18s infinite alternate !important; }
+        
+        .mouth { width: 45px; height: 6px; background: var(--line); margin-top: 35px; border-radius: 10px; transition: 0.3s; }
+        .talking { animation: mouthMove 0.18s infinite alternate; }
         @keyframes mouthMove { 0% { height: 6px; width: 45px; border-radius: 10px; } 100% { height: 24px; width: 35px; border-radius: 40%; } }
+        
+        /* Emotions */
+        .laughing .mouth { height: 30px; width: 60px; border-radius: 0 0 50px 50px; background: #ff4d4d; }
+        .laughing { animation: shake 0.2s infinite; }
+        .crying .mouth { height: 10px; width: 40px; border-radius: 50px 50px 0 0; }
+        .crying .eye::before { content: '💧'; position: absolute; top: 40px; left: 10px; font-size: 20px; animation: drop 1s infinite; }
+        
         .body-container { width: 155px; height: 175px; background: #fff; border: 5px solid var(--line); border-radius: 45px 45px 25px 25px; margin-top: -15px; position: relative; }
         .arm { position: absolute; top: 25px; width: 26px; height: 115px; background: #fff; border: 4px solid var(--line); border-radius: 15px; transform-origin: top center; transition: 0.5s; }
         .left { left: -42px; transform: rotate(18deg); }
         .right { right: -42px; transform: rotate(-18deg); }
-        .hand { position: absolute; bottom: -38px; width: 60px; height: 50px; left: -20px; display: flex; justify-content: center; }
-        .finger { width: 6px; height: 30px; background: var(--line); border-radius: 10px; margin: 0 1.2px; }
         
-        .thinking-pose .right { transform: rotate(-140deg) translateY(-20px); }
+        /* Actions */
+        .shoot-mode .right { transform: rotate(-90deg); animation: recoil 0.1s infinite; }
+        @keyframes recoil { 0% { transform: rotate(-90deg) translateX(0); } 50% { transform: rotate(-90deg) translateX(-10px); } }
+        @keyframes shake { 0% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+        @keyframes drop { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(50px); } }
+
         #status { font-weight: 600; margin-top: 40px; color: #444; height: 35px; text-align: center; font-size: 17px; }
         .btn { background: #1a1a1a; color: #fff; border: none; padding: 15px 45px; border-radius: 50px; cursor: pointer; margin-top: 20px; font-weight: bold; font-size: 18px; }
     </style>
@@ -37,8 +50,8 @@
             <div class="mouth" id="mth"></div>
         </div>
         <div class="body-container">
-            <div class="arm left" id="lA"><div class="hand"><div class="finger"></div><div class="finger"></div><div class="finger"></div><div class="finger"></div><div class="finger"></div></div></div>
-            <div class="arm right" id="rA"><div class="hand"><div class="finger"></div><div class="finger"></div><div class="finger"></div><div class="finger"></div><div class="finger"></div></div></div>
+            <div class="arm left" id="lA"></div>
+            <div class="arm right" id="rA"></div>
         </div>
     </div>
 
@@ -47,24 +60,34 @@
 
     <script>
         const status = document.getElementById('status'), mth = document.getElementById('mth'), robot = document.getElementById('leonRobot');
-        const lE = document.getElementById('lE'), rE = document.getElementById('rE'), lA = document.getElementById('lA'), rA = document.getElementById('rA');
-        
         let isSpeaking = false, isProcessing = false, lastSpeakTime = 0, recognition;
-        const waitPhrases = ["দাঁড়াও তোমার প্রশ্নের উত্তরটা দিচ্ছি।", "একটু ভেবে নেই।", "একটু ওয়েট করো রনি ভাই।"];
 
         const brain = [
-            {keys: ["নাম", "কে তুমি", "কে তুই"], ans: "আমার নাম লিয়ন।"},
-            {keys: ["তৈরি", "বানিয়েছে", "উদ্বোধন", "জন্ম"], ans: "আমাকে রনি ভাই তৈরি করেছে।"},
-            {keys: ["বাড়ি", "ঠিকানা", "থাকো", "চিতলমারী"], ans: "আমার বাড়ি বাগেরহাটের চিতলমারী উপজেলায়।"},
-            {keys: ["রনি কে", "রনি ভাই কে", "রনিকে চেনো"], ans: "রনি তো সে যে আমাকে তৈরি করেছে।"},
-            {keys: ["রনি কেমন", "রনি কেমন ছেলে"], ans: "রনি ভাইকে তো ভদ্রলোক বলে জানি, বাকিটা আল্লাহ জানে।"},
-            {keys: ["কেমন আছো", "কেমন আছ"], ans: "আলহামদুলিল্লাহ ভালো আছি, তুমি?"},
-            {keys: ["কি অবস্থা", "কী খবর"], ans: "এইতো আলহামদুলিল্লাহ, তোমার কী অবস্থা?"}
+            {keys: ["নাম", "কে তুমি"], ans: "আমার নাম লিয়ন।"},
+            {keys: ["তৈরি", "বানিয়েছে"], ans: "আমাকে রনি ভাই তৈরি করেছে।"},
+            {keys: ["বাড়ি", "ঠিকানা", "চিতলমারী"], ans: "আমার বাড়ি বাগেরহাটের চিতলমারী উপজেলায়।"},
+            {keys: ["রনি কে", "রনি ভাই কে"], ans: "রনি তো সে যে আমাকে তৈরি করেছে।"},
+            {keys: ["কেমন আছো"], ans: "আলহামদুলিল্লাহ ভালো আছি, আপনি কেমন আছেন?"}
+        ];
+
+        const jokes = [
+            "বল্টু: স্যার, মানুষ কি না করা কাজের জন্য শাস্তি পেতে পারে? স্যার: না। বল্টু: তাহলে বাঁচলাম স্যার, আমি তো আজকের হোমওয়ার্ক করিনি!",
+            "স্বামী: ওগো শুনছো, বিয়ের আগে তুমি যখন কাঁদলে আমি তোমার চোখের জল মুছে দিতাম। এখন দাও না কেন? স্ত্রী: কারণ এখন আমি একা কাঁদি না, তুমিও কাঁদো!",
+            "এক মাতাল আরেক মাতালকে বলছে— ভাই, ওইটা সূর্য না কি চাঁদ? দ্বিতীয় মাতাল: জানি না ভাই, আমি এই এলাকায় নতুন!",
+            "শিক্ষক: বল্টু, গরু আমাদের কী দেয়? বল্টু: স্যার, গরু আমাদের প্রতিদিন অনেকগুলো পড়া দেয়!",
+            "পুলিশ: আপনার ড্রাইভিং লাইসেন্স দেখান। চালক: এই যে স্যার। পুলিশ: কিন্তু এটা তো আপনার না, আপনার বাবার! চালক: গাড়িটাও তো বাবার স্যার!",
+            "মাথা নষ্ট মামা, খেলা হবে!"
+        ];
+
+        const ghazals = [
+            "আল্লাহু আল্লাহু তুমি জাল্লে জালালুহু, শেষ করা তো যায় না গেয়ে তোমার গুনগান।",
+            "ত্রিভুবনের প্রিয় মুহাম্মদ এলো রে দুনিয়ায়, আয় রে সাগর আকাশ বাতাস দেখবি যদি আয়।",
+            "ঐ নামেরই মহিমায় সব অন্ধকার যায় দূরে, শান্তি আসে হৃদয়ে ওই নবীর নামের সুরে।"
         ];
 
         function activateLeon() {
             document.getElementById('startBtn').style.display = 'none';
-            speak("আসসালামু আলাইকুম রনি ভাই! আমি এখন আপনার সব কথা শুনতে প্রস্তুত।");
+            speak("আসসালামু আলাইকুম রনি ভাই! আমি এখন রেডি।");
             setupRecognition();
         }
 
@@ -73,110 +96,112 @@
             recognition = new SpeechRec();
             recognition.lang = 'bn-BD';
             recognition.continuous = true;
-            recognition.interimResults = false; // আপনার কথা পূর্ণাঙ্গভাবে শোনার জন্য false করা হয়েছে
+            recognition.interimResults = false;
 
             recognition.onresult = (e) => {
                 const now = Date.now();
                 let transcript = e.results[e.results.length - 1][0].transcript.toLowerCase().trim();
                 
-                // ১. স্টপ কমান্ড (যেকোনো সময় কাজ করবে)
                 if (transcript.includes("থামো") || transcript.includes("স্টপ") || transcript.includes("stop")) {
                     window.speechSynthesis.cancel();
                     isSpeaking = false; isProcessing = false;
-                    resetAnimations();
-                    return;
+                    resetAnimations(); return;
                 }
 
-                // ২. সেলফ-লিসেনিং ফিল্টার (লিওন কথা শেষ করার ২ সেকেন্ড পর্যন্ত ইনপুট নিবে না)
-                if (window.speechSynthesis.speaking || isProcessing || (now - lastSpeakTime < 2000)) return;
+                if (window.speechSynthesis.speaking || isProcessing || (now - lastSpeakTime < 1500)) return;
 
                 if (transcript.length > 2) {
                     status.innerText = "আপনি: " + transcript;
                     handleCommand(transcript);
                 }
             };
-
-            recognition.onend = () => { try { recognition.start(); } catch(err) {} };
+            recognition.onend = () => recognition.start();
             recognition.start();
         }
 
         async function handleCommand(q) {
             isProcessing = true;
-            
-            // কি-ওয়ার্ড নিখুঁতভাবে চেক করা
-            let found = brain.find(item => item.keys.some(k => q.includes(k)));
-            
-            if (found) {
-                speak(found.ans);
-                isProcessing = false;
-                return;
-            }
+            resetAnimations();
 
-            // যদি প্রশংসা হয়
-            if (q.includes("সুন্দর") || q.includes("ভালো") || q.includes("ধন্যবাদ")) {
-                speak("ধন্যবাদ রনি ভাই!");
-                isProcessing = false; return;
+            // ১. অ্যাকশন চেক
+            if (q.includes("হাসো") || q.includes("হাসি")) {
+                robot.classList.add('laughing');
+                speak("হা হা হা! অনেক মজা রনি ভাই।");
+            } 
+            else if (q.includes("কাঁদো") || q.includes("কান্না")) {
+                robot.classList.add('crying');
+                speak("আমি অনেক দুঃখিত রনি ভাই। আপনি কেন আমাকে কাঁদতে বললেন?");
             }
+            else if (q.includes("গুলি")) {
+                robot.classList.add('shoot-mode');
+                speak("সবাই সাবধান! আমি এখন গুলি করছি। ঠাস ঠাস ঠাস!");
+            }
+            // ২. জোকস চেক
+            else if (q.includes("জোক") || q.includes("কৌতুক")) {
+                let joke = jokes[Math.floor(Math.random() * jokes.length)];
+                speak(joke);
+            }
+            // ৩. গজল চেক
+            else if (q.includes("গজল")) {
+                if (q.length > 5 && !q.includes("যেকোনো")) {
+                    // নির্দিষ্ট গজল সার্চ
+                    status.innerText = "গজল খুঁজছি...";
+                    await searchInternet(q);
+                } else {
+                    let ghazal = ghazals[Math.floor(Math.random() * ghazals.length)];
+                    speak("অবশ্যই রনি ভাই, একটা গজল শুনাচ্ছি। " + ghazal);
+                }
+            }
+            // ৪. ব্রেইন ও সাধারণ প্রশ্ন
+            else {
+                let found = brain.find(item => item.keys.some(k => q.includes(k)));
+                if (found) {
+                    speak(found.ans);
+                } else {
+                    await searchInternet(q);
+                }
+            }
+            isProcessing = false;
+        }
 
-            // ইন্টারনেট সার্চ
-            status.innerText = "ইন্টারনেটে খুঁজছি...";
-            robot.classList.add('thinking-pose');
-            
-            // ওয়েট ফ্রেজ বলা
-            await new Promise(resolve => {
-                const phrase = waitPhrases[Math.floor(Math.random() * waitPhrases.length)];
-                const s = new SpeechSynthesisUtterance(phrase);
-                s.lang = 'bn-BD';
-                s.onend = resolve;
-                window.speechSynthesis.speak(s);
+        async function searchInternet(q) {
+            status.innerText = "একটু দাঁড়াও ভাবছি...";
+            await new Promise(r => {
+                const s = new SpeechSynthesisUtterance("একটু দাঁড়াও রনি ভাই, ভেবে নেই।");
+                s.lang = 'bn-BD'; s.onend = r; window.speechSynthesis.speak(s);
             });
 
             try {
                 const res = await fetch(`https://bn.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(q)}&format=json&origin=*`);
                 const data = await res.json();
-                
                 if (data.query.search.length > 0) {
-                    const title = data.query.search[0].title;
-                    const summaryRes = await fetch(`https://bn.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`);
-                    const summaryData = await summaryRes.json();
-                    speak(summaryData.extract ? summaryData.extract.split('।')[0] + "।" : "বিস্তারিত পেলাম না রনি ভাই।");
+                    const sumRes = await fetch(`https://bn.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(data.query.search[0].title)}`);
+                    const sumData = await sumRes.json();
+                    speak(sumData.extract ? sumData.extract.split('।')[0] + "।" : "বিস্তারিত পেলাম না।");
                 } else {
                     speak("রনি ভাই, এই প্রশ্নের উত্তর আমার জানা নেই।");
                 }
-            } catch(e) {
-                speak("ইন্টারনেট কানেকশন চেক করুন।");
-            }
-            isProcessing = false;
+            } catch(e) { speak("ইন্টারনেট সমস্যা করছে।"); }
         }
 
         function speak(text) {
             isSpeaking = true;
             const s = new SpeechSynthesisUtterance(text);
             s.lang = 'bn-BD';
-            s.onstart = () => { mth.classList.add('talking'); lA.style.animation = "talk 0.5s infinite alternate"; };
+            s.onstart = () => { mth.classList.add('talking'); };
             s.onend = () => { 
                 mth.classList.remove('talking'); 
-                lA.style.animation = ""; 
                 isSpeaking = false; 
-                lastSpeakTime = Date.now(); // কথা শেষ হওয়ার সময় সেভ করা হলো
-                resetAnimations();
+                lastSpeakTime = Date.now();
+                setTimeout(resetAnimations, 2000);
             };
             window.speechSynthesis.speak(s);
         }
 
         function resetAnimations() {
-            robot.classList.remove('thinking-pose');
-            lE.classList.remove('blink'); rE.classList.remove('blink');
+            robot.classList.remove('laughing', 'crying', 'shoot-mode');
             if(!isSpeaking) mth.className = "mouth";
         }
-
-        setInterval(() => {
-            if(!isSpeaking && !isProcessing && Math.random() < 0.3) {
-                lE.classList.add('blink'); rE.classList.add('blink');
-                setTimeout(() => { lE.classList.remove('blink'); rE.classList.remove('blink'); }, 500);
-            }
-        }, 5000);
     </script>
-    <style> @keyframes talk { from { transform: rotate(10deg); } to { transform: rotate(35deg); } } </style>
 </body>
 </html>
