@@ -23,10 +23,8 @@
         .right { right: -42px; transform: rotate(-18deg); }
         .hand { position: absolute; bottom: -38px; width: 60px; height: 50px; left: -20px; display: flex; justify-content: center; }
         .finger { width: 6px; height: 30px; background: var(--line); border-radius: 10px; margin: 0 1.2px; }
-        
         .scratch-head .right { transform: rotate(-150deg) translateY(-30px); animation: scratch 0.3s infinite; }
         .thinking-pose .right { transform: rotate(-140deg) translateY(-20px); }
-        .shoot-mode .right { transform: rotate(-90deg); }
         @keyframes scratch { 0%, 100% { transform: rotate(-150deg); } 50% { transform: rotate(-160deg); } }
         #status { font-weight: 600; margin-top: 40px; color: #444; height: 35px; text-align: center; font-size: 17px; }
         .btn { background: #1a1a1a; color: #fff; border: none; padding: 15px 45px; border-radius: 50px; cursor: pointer; margin-top: 20px; font-weight: bold; font-size: 18px; }
@@ -53,14 +51,14 @@
         const lE = document.getElementById('lE'), rE = document.getElementById('rE'), lA = document.getElementById('lA'), rA = document.getElementById('rA');
         
         let speaking = false, isProcessing = false, recognition;
-        const viralDialogues = ["মাথা নষ্ট মামা!", "খেলা হবে!", "অস্থির ভাই অস্থির!", "একদম কোপাইয়া দিমু!", "সেই লেভেল ভাই!"];
         const waitPhrases = ["দাঁড়াও তোমার প্রশ্নের উত্তরটা দিচ্ছি।", "একটু ভেবে নেই।", "একটু ওয়েট করো রনি ভাই।"];
 
+        // আপনার দেওয়া মূল ৭টি প্রশ্ন ও উত্তর
         const brain = [
-            {keys: ["নাম", "কে তুমি"], ans: "আমার নাম লিয়ন।"},
-            {keys: ["তৈরি", "বানিয়েছে", "জন্ম"], ans: "আমাকে রনি ভাই তৈরি করেছে।"},
-            {keys: ["বাড়ি", "থাকো", "ঠিকানা"], ans: "আমার বাড়ি বাগেরহাটের চিতলমারী উপজেলায়।"},
-            {keys: ["রনি কে", "রনি ভাই"], ans: "রনি তো সে যে আমাকে তৈরি করেছে।"},
+            {keys: ["নাম", "তুমি কে"], ans: "আমার নাম লিয়ন।"},
+            {keys: ["তৈরি", "বানিয়েছে", "উদ্বোধন"], ans: "আমাকে রনি ভাই তৈরি করেছে।"},
+            {keys: ["বাড়ি", "থাকো", "ঠিকানা", "চিতলমারী"], ans: "আমার বাড়ি বাগেরহাটের চিতলমারী উপজেলায়।"},
+            {keys: ["রনি কে", "রনি ভাই কে"], ans: "রনি তো সে যে আমাকে তৈরি করেছে।"},
             {keys: ["রনি কেমন"], ans: "রনি ভাইকেতো ভদ্রলোক বলে জানি, বাকিটা আল্লাহ জানে।"},
             {keys: ["কেমন আছো"], ans: "আলহামদুলিল্লাহ ভালো আছি, তুমি?"},
             {keys: ["কি অবস্থা", "কী খবর"], ans: "এইতো আলহামদুলিল্লাহ, তোমার কী অবস্থা?"}
@@ -78,12 +76,12 @@
             recognition = new SpeechRec();
             recognition.lang = 'bn-BD';
             recognition.continuous = true;
-            recognition.interimResults = true; 
+            recognition.interimResults = true;
 
             recognition.onresult = (e) => {
                 let transcript = e.results[e.results.length - 1][0].transcript.toLowerCase().trim();
                 
-                // ১. স্টপ কমান্ড সবসময় কাজ করবে
+                // ১. স্টপ কমান্ড চেক (লিওন কথা বললেও এটা কাজ করবে)
                 if (transcript.includes("থামো") || transcript.includes("স্টপ") || transcript.includes("stop")) {
                     window.speechSynthesis.cancel();
                     speaking = false; isProcessing = false;
@@ -91,39 +89,33 @@
                     return;
                 }
 
-                // ২. যদি সে কথা বলতে থাকে, তবে সে অন্য কিছু শুনবে না (কিন্তু স্টপ কমান্ড শুনবে)
-                if (speaking || isProcessing) return;
+                // ২. সেলফ-লিসেনিং ফিল্টার: লিওন কথা বলার সময় "স্টপ" ছাড়া অন্য কিছু শুনবে না
+                if (window.speechSynthesis.speaking || isProcessing) return;
 
-                // ৩. শুধুমাত্র ফাইনাল রেজাল্ট এবং ছোট শব্দ (নয়েজ) এড়িয়ে চলা
+                // ৩. ফাইনাল রেজাল্ট হ্যান্ডেল করা (ছোট নয়েজ বাদ দেওয়ার জন্য transcript.length > 2)
                 if (e.results[e.results.length - 1].isFinal && transcript.length > 2) {
                     status.innerText = "আপনি: " + transcript;
                     handleCommand(transcript);
                 }
             };
-            
-            recognition.onend = () => { try { recognition.start(); } catch(e) {} };
+
+            recognition.onend = () => { try { recognition.start(); } catch(err) {} };
             recognition.start();
         }
 
         async function handleCommand(q) {
             isProcessing = true;
-            // আপনার ব্রেইন ডাটাবেস চেক (সরাসরি উত্তর)
+
+            // প্রথমে ব্রেইন চেক (এতে কোনো "দাঁড়াও" বলবে না)
             let found = brain.find(item => item.keys.some(k => q.includes(k)));
-            
             if (found) {
                 speak(found.ans);
                 isProcessing = false;
                 return;
             }
 
-            // যদি প্রশংসা হয়
-            if (q.includes("সুন্দর") || q.includes("ভালো") || q.includes("ধন্যবাদ")) {
-                speak("ধন্যবাদ রনি ভাই!");
-                isProcessing = false; return;
-            }
-
-            // ইন্টারনেট সার্চ (এখানে "দাঁড়াও" বলবে)
-            status.innerText = "ইন্টারনেটে খুঁজছি...";
+            // ইন্টারনেট সার্চ শুরু (এখানে "দাঁড়াও ভাবছি" বলবে)
+            status.innerText = "খুঁজছি...";
             robot.classList.add('thinking-pose');
             
             // ওয়েট ফ্রেজ বলা
@@ -137,19 +129,24 @@
 
             try {
                 // উইকিপিডিয়া সার্চ লজিক
-                const res = await fetch(`https://bn.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(q)}&format=json&origin=*`);
-                const data = await res.json();
-                
-                if (data.query.search.length > 0) {
-                    const title = data.query.search[0].title;
+                const searchRes = await fetch(`https://bn.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(q)}&format=json&origin=*`);
+                const searchData = await searchRes.json();
+
+                if (searchData.query.search.length > 0) {
+                    const title = searchData.query.search[0].title;
                     const summaryRes = await fetch(`https://bn.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`);
                     const summaryData = await summaryRes.json();
-                    speak(summaryData.extract ? summaryData.extract.split('।')[0] + "।" : "দুঃখিত রনি ভাই, ইন্টারনেটে বিস্তারিত পেলাম না।");
+                    
+                    if (summaryData.extract) {
+                        speak(summaryData.extract.split('।')[0] + "।");
+                    } else {
+                        speak("দুঃখিত রনি ভাই, সঠিক উত্তর খুঁজে পেলাম না।");
+                    }
                 } else {
                     speak("রনি ভাই, এই প্রশ্নের উত্তর আমার জানা নেই।");
                 }
             } catch(e) {
-                speak("ইন্টারনেট কানেকশনে সমস্যা হচ্ছে রনি ভাই।");
+                speak("ইন্টারনেট কানেকশন চেক করুন রনি ভাই।");
             }
             isProcessing = false;
         }
@@ -158,7 +155,10 @@
             speaking = true;
             const s = new SpeechSynthesisUtterance(text);
             s.lang = 'bn-BD';
-            s.onstart = () => { mth.classList.add('talking'); lA.style.animation = "talk 0.5s infinite alternate"; };
+            s.onstart = () => { 
+                mth.classList.add('talking'); 
+                lA.style.animation = "talk 0.5s infinite alternate"; 
+            };
             s.onend = () => { 
                 mth.classList.remove('talking'); 
                 lA.style.animation = ""; 
@@ -173,23 +173,19 @@
                 if(!speaking && !isProcessing) {
                     const r = Math.random();
                     resetAnimations();
-                    if(r < 0.15) { 
-                        robot.classList.add('scratch-head'); 
-                        speak(viralDialogues[Math.floor(Math.random() * viralDialogues.length)]);
-                    }
-                    else if(r < 0.3) robot.classList.add('shoot-mode');
-                    else if(r < 0.5) { lE.classList.add('blink'); rE.classList.add('blink'); }
+                    if(r < 0.2) robot.classList.add('scratch-head');
+                    else if(r < 0.4) { lE.classList.add('blink'); rE.classList.add('blink'); }
                     setTimeout(resetAnimations, 3000);
                 }
-            }, 10000); // ৮-১০ সেকেন্ড পর পর আইডিয়াল অ্যাকশন
+            }, 10000);
         }
 
         function resetAnimations() {
-            robot.classList.remove('scratch-head', 'shoot-mode', 'thinking-pose');
+            robot.classList.remove('scratch-head', 'thinking-pose');
             lE.classList.remove('blink'); rE.classList.remove('blink');
             if(!speaking) mth.className = "mouth";
         }
     </script>
-    <style> @keyframes talk { from { transform: rotate(10deg); } to { transform: rotate(40deg); } } </style>
+    <style> @keyframes talk { from { transform: rotate(10deg); } to { transform: rotate(35deg); } } </style>
 </body>
 </html>
