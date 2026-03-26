@@ -205,25 +205,24 @@
             } 
             else if (q.includes("কাঁদো") || q.includes("কান্না")) {
                 robot.classList.add('crying');
-                speak("আমি অনেক দুঃখিত রনি ভাই। আপনি কেন আমাকে কাঁদতে বললেন?");
+                speak(" উয়্যায়্যায়্যায়্যায়্যা উয়্যা উয়্যায়্যায়্যা");
             }
             else if (q.includes("গুলি")) {
                 robot.classList.add('shoot-mode');
-                speak("সবাই সাবধান! আমি এখন গুলি করছি। ঠাস ঠাস ঠাস!");
+                speak("সবাই সাবধান! আমি এখন গুলি করছি। ঠুস ঠুস ঠুস!");
             }
             // ২. জোকস চেক
             else if (q.includes("জোক") || q.includes("কৌতুক")) {
                 let joke = jokes[Math.floor(Math.random() * jokes.length)];
                 speak(joke);
             }
-                        // লিওন বলে ডাকলে উত্তর দেওয়া
-            if (q === "লিওন" || q.includes("িলওন")) {
+                        // ৩. লিওন বলে ডাকলে উত্তর দেওয়া
+           else if (q === "লিওন" || q === "লিয়ন") {
                 speak("জী ভাই, বলুন?");
-                return;
+                // এখানে return নেই, তাই সে নিচের অন্য প্রশ্নগুলোও চেক করবে
             }
-
-            // ৩. গজল চেক
-            else if (q.includes("গজল")) {
+                                // ৪. গজল চেক
+           else if (q.includes("গজল")) {
                 if (q.length > 5 && !q.includes("যেকোনো")) {
                     // নির্দিষ্ট গজল সার্চ
                     status.innerText = "গজল খুঁজছি...";
@@ -233,12 +232,12 @@
                     speak("অবশ্যই রনি ভাই, একটা গজল শুনাচ্ছি। " + ghazal);
                 }
             }
-                        // ৪. সাধারণ জ্ঞান চেক
+                        // ৫. সাধারণ জ্ঞান চেক
             else if (q.includes("সাধারণ জ্ঞান")) {
                 let gk = gkList[Math.floor(Math.random() * gkList.length)];
                 speak(gk);
             }
-            // ৫. ব্রেইন ও সাধারণ প্রশ্ন
+            // ৬. ব্রেইন ও সাধারণ প্রশ্ন
             else {
                 let found = brain.find(item => item.keys.some(k => q.includes(k)));
                 if (found) {
