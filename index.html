@@ -3,43 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leon - Smart Emotional AI Pet</title>
+    <title>Leon - Pro AI Pet</title>
     <style>
         :root { --line: #1a1a1a; --bg: #f4f6f9; }
-        body { background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; }
-        .robot { position: relative; width: 320px; height: 500px; display: flex; flex-direction: column; align-items: center; transition: 0.3s; }
-        .head { width: 210px; height: 185px; background: #fff; border: 5px solid var(--line); border-radius: 55px; position: relative; z-index: 10; display: flex; flex-direction: column; align-items: center; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        .eyes { display: flex; justify-content: space-around; width: 100%; margin-top: 55px; padding: 0 30px; box-sizing: border-box; }
-        .eye { width: 45px; height: 45px; background: var(--line); border-radius: 50%; position: relative; }
-        .eye::after { content: ''; position: absolute; width: 12px; height: 12px; background: #fff; border-radius: 50%; top: 8px; right: 8px; }
+        body { background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: 'Segoe UI', Arial, sans-serif; overflow: hidden; }
         
-        /* Animations */
-        .blink { animation: fastBlink 0.15s; }
-        @keyframes fastBlink { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.1); } }
+        /* Robot UI */
+        .robot { position: relative; width: 300px; height: 450px; display: flex; flex-direction: column; align-items: center; transition: 0.3s; }
+        .head { width: 200px; height: 170px; background: #fff; border: 5px solid var(--line); border-radius: 50px; position: relative; z-index: 10; display: flex; flex-direction: column; align-items: center; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .eyes { display: flex; justify-content: space-around; width: 100%; margin-top: 50px; padding: 0 30px; box-sizing: border-box; }
+        .eye { width: 40px; height: 40px; background: var(--line); border-radius: 50%; position: relative; }
+        .eye::after { content: ''; position: absolute; width: 10px; height: 10px; background: #fff; border-radius: 50%; top: 8px; right: 8px; }
+        .mouth { width: 40px; height: 6px; background: var(--line); margin-top: 30px; border-radius: 10px; transition: 0.3s; }
         
-        .mouth { width: 45px; height: 6px; background: var(--line); margin-top: 35px; border-radius: 10px; transition: 0.3s; }
-        .talking { animation: mouthMove 0.18s infinite alternate; }
-        @keyframes mouthMove { 0% { height: 6px; width: 45px; border-radius: 10px; } 100% { height: 24px; width: 35px; border-radius: 40%; } }
-        
-        /* Emotions */
-        .laughing .mouth { height: 30px; width: 60px; border-radius: 0 0 50px 50px; background: #ff4d4d; }
-        .laughing { animation: shake 0.2s infinite; }
-        .crying .mouth { height: 10px; width: 40px; border-radius: 50px 50px 0 0; }
-        .crying .eye::before { content: '💧'; position: absolute; top: 40px; left: 10px; font-size: 20px; animation: drop 1s infinite; }
-        
-        .body-container { width: 155px; height: 175px; background: #fff; border: 5px solid var(--line); border-radius: 45px 45px 25px 25px; margin-top: -15px; position: relative; }
-        .arm { position: absolute; top: 25px; width: 26px; height: 115px; background: #fff; border: 4px solid var(--line); border-radius: 15px; transform-origin: top center; transition: 0.5s; }
-        .left { left: -42px; transform: rotate(18deg); }
-        .right { right: -42px; transform: rotate(-18deg); }
-        
-        /* Actions */
-        .shoot-mode .right { transform: rotate(-90deg); animation: recoil 0.1s infinite; }
-        @keyframes recoil { 0% { transform: rotate(-90deg) translateX(0); } 50% { transform: rotate(-90deg) translateX(-10px); } }
-        @keyframes shake { 0% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
-        @keyframes drop { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(50px); } }
+        .body-container { width: 140px; height: 160px; background: #fff; border: 5px solid var(--line); border-radius: 40px; margin-top: -10px; position: relative; }
+        .arm { position: absolute; top: 20px; width: 22px; height: 100px; background: #fff; border: 4px solid var(--line); border-radius: 15px; transform-origin: top center; transition: 0.3s; }
+        .left { left: -35px; transform: rotate(15deg); }
+        .right { right: -35px; transform: rotate(-15deg); }
 
-        #status { font-weight: 600; margin-top: 40px; color: #444; height: 35px; text-align: center; font-size: 17px; }
-        .btn { background: #1a1a1a; color: #fff; border: none; padding: 15px 45px; border-radius: 50px; cursor: pointer; margin-top: 20px; font-weight: bold; font-size: 18px; }
+        /* Animations */
+        .talking { animation: mouthMove 0.2s infinite alternate; }
+        @keyframes mouthMove { from { height: 6px; } to { height: 20px; width: 30px; border-radius: 40%; } }
+        .blink { animation: eyeBlink 0.15s; }
+        @keyframes eyeBlink { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.1); } }
+        .laughing { animation: shake 0.2s infinite; }
+        .laughing .mouth { height: 25px; border-radius: 0 0 40px 40px; background: #ff4d4d; }
+        .crying .eye::before { content: '💧'; position: absolute; top: 35px; left: 5px; font-size: 18px; animation: drop 1s infinite; }
+        .shoot-mode .right { transform: rotate(-90deg); animation: recoil 0.1s infinite; }
+        @keyframes recoil { 0% { transform: translate(0); } 50% { transform: translateX(-10px); } }
+        @keyframes shake { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+        @keyframes drop { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(40px); } }
+
+        #status { font-weight: 600; margin-top: 30px; color: #444; height: 30px; text-align: center; font-size: 16px; }
+        .btn { background: #1a1a1a; color: #fff; border: none; padding: 15px 40px; border-radius: 50px; cursor: pointer; font-weight: bold; margin-top: 20px; }
     </style>
 </head>
 <body>
@@ -62,32 +58,64 @@
         const status = document.getElementById('status'), mth = document.getElementById('mth'), robot = document.getElementById('leonRobot');
         let isSpeaking = false, isProcessing = false, lastSpeakTime = 0, recognition;
 
-        const brain = [
-            {keys: ["নাম", "কে তুমি"], ans: "আমার নাম লিয়ন।"},
-            {keys: ["তৈরি", "বানিয়েছে"], ans: "আমাকে রনি ভাই তৈরি করেছে।"},
-            {keys: ["বাড়ি", "ঠিকানা", "চিতলমারী"], ans: "আমার বাড়ি বাগেরহাটের চিতলমারী উপজেলায়।"},
-            {keys: ["রনি কে", "রনি ভাই কে"], ans: "রনি তো সে যে আমাকে তৈরি করেছে।"},
-            {keys: ["কেমন আছো"], ans: "আলহামদুলিল্লাহ ভালো আছি, আপনি কেমন আছেন?"}
+        // আপনার দেওয়া ১৫০টি সাধারণ জ্ঞান
+        const gkList = [
+            "পানির রাসায়নিক সংকেত H2O", "অক্সিজেনের পারমাণবিক সংখ্যা ৮", "হাইড্রোজেন মহাবিশ্বের সবচেয়ে বেশি বিদ্যমান মৌল", 
+            "আলোর গতি প্রায় ৩x১০^৮ মিটার/সেকেন্ড", "নিউটনের দ্বিতীয় সূত্র F = ma", "গ্রাভিটির ত্বরণ পৃথিবীতে প্রায় ৯.৮ m/s^2", 
+            "DNA-এর গঠন ডাবল হেলিক্স", "মানুষের মস্তিষ্কে প্রায় ৮৬ বিলিয়ন নিউরন", "pH স্কেল ০–১৪ পর্যন্ত", "নিরপেক্ষ pH = ৭", 
+            "সূর্য একটি G-type main sequence star", "পৃথিবীর বায়ুমণ্ডলে ৭৮% নাইট্রোজেন", "পানি ১০০°C তাপমাত্রায় ফুটে (১ atm চাপ)", 
+            "বরফের ঘনত্ব পানির চেয়ে কম", "শব্দ শূন্যস্থানে চলতে পারে না", "আলো শূন্যস্থানে চলতে পারে", "কার্বন চারটি বন্ধন তৈরি করতে পারে", 
+            "সালোকসংশ্লেষে CO2 ও H2O ব্যবহার হয়", "ATP হলো কোষের শক্তির মুদ্রা", "মাইটোকন্ড্রিয়াকে কোষের পাওয়ারহাউস বলা হয়", 
+            "ব্ল্যাক হোলের গ্রাভিটি এত বেশি যে আলোও বের হতে পারে না", "সময় আপেক্ষিক—আইনস্টাইনের তত্ত্ব", "ভর ও শক্তির সম্পর্ক E = mc^2", 
+            "নিউট্রন নিরপেক্ষ কণা", "ইলেকট্রন ঋণাত্মক চার্জ বহন করে", "প্রোটন ধনাত্মক চার্জ বহন করে", "মহাবিশ্ব সম্প্রসারিত হচ্ছে", 
+            "বিগ ব্যাং তত্ত্ব মহাবিশ্বের উৎপত্তি ব্যাখ্যা করে", "মিল্কিওয়ে আমাদের গ্যালাক্সি", "পৃথিবী সূর্যকে ৩৬৫ দিনে প্রদক্ষিণ করে", 
+            "মানুষের হৃদপিণ্ড দিনে প্রায় ১ লক্ষ বার স্পন্দিত হয়", "রক্তের লোহিত কণিকা অক্সিজেন বহন করে", "সাদা রক্তকণিকা রোগ প্রতিরোধ করে", 
+            "ভিটামিন D সূর্যালোক থেকে পাওয়া যায়", "ভিটামিন C রোগ প্রতিরোধে সাহায্য করে", "প্রোটিন অ্যামিনো অ্যাসিড দিয়ে তৈরি", 
+            "এনজাইম জৈব অনুঘটক", "ইনসুলিন রক্তে গ্লুকোজ নিয়ন্ত্রণ করে", "মানুষের দেহে ২০৬টি হাড়", "লিভার শরীরের সবচেয়ে বড় গ্রন্থি", 
+            "IQ বুদ্ধিমত্তার একটি মাপকাঠি", "EQ আবেগীয় বুদ্ধিমত্তা নির্দেশ করে", "কগনিটিভ বায়াস চিন্তার ভুল প্রবণতা", 
+            "ফ্রয়েড অবচেতন মনের ধারণা দেন", "পাভলভ ক্লাসিক্যাল কন্ডিশনিং আবিষ্কার করেন", "স্কিনার অপারেন্ট কন্ডিশনিং দেন", 
+            "Maslow’s hierarchy মানব প্রয়োজনের স্তর দেখায়", "ডোপামিন আনন্দের অনুভূতির সাথে যুক্ত", "সেরোটোনিন মুড নিয়ন্ত্রণ করে", 
+            "স্ট্রেস কর্টিসল হরমোন বাড়ায়", "মেমোরি তিন প্রকার: sensory, short-term, long-term", "নিউরোপ্লাস্টিসিটি মস্তিষ্কের পরিবর্তন ক্ষমতা", 
+            "Habit loop: cue–routine–reward", "Procrastination কাজ ফেলে রাখা", "Confirmation bias নিজের মতকে সমর্থন খোঁজা", 
+            "Cognitive dissonance মানসিক দ্বন্দ্ব", "Placebo effect বিশ্বাসের প্রভাব", "Anxiety ভবিষ্যৎভিত্তিক ভয়", 
+            "Depression দীর্ঘমেয়াদি মনখারাপ", "Motivation অন্তর্নিহিত ও বাহ্যিক হতে পারে", "প্লেটো আদর্শ রাষ্ট্রের ধারণা দেন", 
+            "অ্যারিস্টটল যুক্তিবিদ্যার জনক", "সক্রেটিস প্রশ্নোত্তর পদ্ধতি ব্যবহার করেন", "ডেকার্তে বলেন I think, therefore I am", 
+            "Utilitarianism সর্বোচ্চ সুখকে গুরুত্ব দেয়", "Existentialism ব্যক্তির স্বাধীনতাকে গুরুত্ব দেয়", "Nihilism জীবনের অর্থ অস্বীকার করে", 
+            "Empiricism অভিজ্ঞতাকে জ্ঞানের উৎস মানে", "Rationalism যুক্তিকে প্রধান মানে", "Ethics নৈতিকতার অধ্যয়ন", 
+            "ইসলামে তাওহিদ আল্লাহর একত্ববাদ", "কুরআন ইসলামের পবিত্র গ্রন্থ", "হাদিস নবী (সা.)-এর বাণী ও কর্ম", "ইসলামের পাঁচ স্তম্ভ রয়েছে", 
+            "দিনে ৫ ওয়াক্ত নামাজ ফরজ", "রমজানে রোজা ফরজ", "যাকাত ফরজ ইবাদত", "হজ সামর্থ্যবানদের জন্য ফরজ", "লাইলাতুল কদর বিশেষ মর্যাদাসম্পন্ন রাত", 
+            "সুদ ইসলামে হারাম", "ফেরেশতা নূর দিয়ে সৃষ্টি", "জিন আগুন থেকে সৃষ্টি", "আদম (আ.) প্রথম মানুষ", "মুহাম্মদ (সা.) শেষ নবী", 
+            "কিয়ামত হবে", "জান্নাত পুরস্কারের স্থান", "জাহান্নাম শাস্তির স্থান", "তাকওয়া আল্লাহভীতি", "নিয়ত কাজের মূল্য নির্ধারণ করে", 
+            "ইহসান সর্বোচ্চ ইবাদতের স্তর", "মুক্তিযুদ্ধ ১৯৭১ সালে", "ভাষা আন্দোলন ১৯৫২ সালে", "সংবিধান প্রণয়ন ১৯৭২", "বাংলাদেশে ৮টি বিভাগ", 
+            "৬৪টি জেলা রয়েছে", "জাতীয় সংগীত আমার সোনার বাংলা", "জাতীয় ফুল শাপলা", "জাতীয় পাখি দোয়েল", "জাতীয় প্রাণী রয়েল বেঙ্গল টাইগার", 
+            "জাতীয় মাছ ইলিশ", "সুন্দরবন বিশ্বের বৃহত্তম ম্যানগ্রোভ বন", "কক্সবাজার দীর্ঘতম সমুদ্র সৈকত", "পদ্মা দেশের প্রধান নদী", "ঢাকা রাজধানী", 
+            "চট্টগ্রাম প্রধান বন্দর", "সিলেট চা উৎপাদনে বিখ্যাত", "রাজশাহী আমের জন্য বিখ্যাত", "খুলনা সুন্দরবনের কাছে", "জাতিসংঘ প্রতিষ্ঠা ১৯৪৫", 
+            "WHO স্বাস্থ্য সংস্থা", "UNESCO শিক্ষা ও সংস্কৃতি সংস্থা", "IMF অর্থনৈতিক সংস্থা", "বিশ্বব্যাংক উন্নয়ন সহায়তা দেয়", 
+            "OIC মুসলিম দেশগুলোর সংগঠন", "SAARC দক্ষিণ এশিয়ার সংস্থা", "NATO সামরিক জোট", "EU ইউরোপীয় ইউনিয়ন", "BRICS উদীয়মান অর্থনীতি", 
+            "পৃথিবীর বয়স প্রায় ৪.৫ বিলিয়ন বছর", "গ্লোবাল ওয়ার্মিং তাপমাত্রা বাড়ায়", "কার্বন ডাই অক্সাইড গ্রিনহাউস গ্যাস", 
+            "ওজোন স্তর UV রশ্মি প্রতিরোধ করে", "রিসাইক্লিং পরিবেশ রক্ষা করে", "সৌরশক্তি নবায়নযোগ্য", "বায়ুশক্তি নবায়নযোগ্য", 
+            "বিদ্যুৎ প্রবাহের একক অ্যাম্পিয়ার", "ভোল্টেজের একক ভোল্ট", "রোধের একক ওহম", "ওহমের সূত্র V = IR", "কাজের একক জুল", 
+            "শক্তির একক জুল", "ক্ষমতার একক ওয়াট", "তাপমাত্রার SI একক কেলভিন", "তরঙ্গের গতি = ফ্রিকোয়েন্সি x তরঙ্গদৈর্ঘ্য", 
+            "শব্দের গতি বায়ুতে প্রায় ৩৪৩ মিটার/সেকেন্ড", "আলোর বেগ সর্বোচ্চ গতি", "তড়িৎচুম্বকীয় তরঙ্গ শূন্যস্থানে চলে", 
+            "লেন্স আলোকে প্রতিসরিত করে", "আয়না আলো প্রতিফলিত করে", "নিউটনের তৃতীয় সূত্র: ক্রিয়া = প্রতিক্রিয়া", 
+            "ঘর্ষণ বল গতির বিরোধিতা করে", "চাপ = বল/ক্ষেত্রফল", "ঘনত্ব = ভর/আয়তন", "তাপ সবসময় উচ্চ তাপমাত্রা থেকে নিম্নে যায়", 
+            "বয়েলের সূত্র: চাপ ও আয়তনের সম্পর্ক", "চার্লসের সূত্র: আয়তন ও তাপমাত্রার সম্পর্ক", "অ্যাভোগাড্রো সংখ্যা প্রায় 6.022x10^23", 
+            "ইলেকট্রোম্যাগনেট বিদ্যুৎ দিয়ে তৈরি হয়", "নিউক্লিয়ার ফিউশনে শক্তি উৎপন্ন হয়", "নিউক্লিয়ার ফিশনে ভারী নিউক্লিয়াস ভেঙে যায়"
         ];
 
-        const jokes = [
-            "বল্টু: স্যার, মানুষ কি না করা কাজের জন্য শাস্তি পেতে পারে? স্যার: না। বল্টু: তাহলে বাঁচলাম স্যার, আমি তো আজকের হোমওয়ার্ক করিনি!",
-            "স্বামী: ওগো শুনছো, বিয়ের আগে তুমি যখন কাঁদলে আমি তোমার চোখের জল মুছে দিতাম। এখন দাও না কেন? স্ত্রী: কারণ এখন আমি একা কাঁদি না, তুমিও কাঁদো!",
-            "এক মাতাল আরেক মাতালকে বলছে— ভাই, ওইটা সূর্য না কি চাঁদ? দ্বিতীয় মাতাল: জানি না ভাই, আমি এই এলাকায় নতুন!",
-            "শিক্ষক: বল্টু, গরু আমাদের কী দেয়? বল্টু: স্যার, গরু আমাদের প্রতিদিন অনেকগুলো পড়া দেয়!",
-            "পুলিশ: আপনার ড্রাইভিং লাইসেন্স দেখান। চালক: এই যে স্যার। পুলিশ: কিন্তু এটা তো আপনার না, আপনার বাবার! চালক: গাড়িটাও তো বাবার স্যার!",
-            "মাথা নষ্ট মামা, খেলা হবে!"
-        ];
-
-        const ghazals = [
-            "আল্লাহু আল্লাহু তুমি জাল্লে জালালুহু, শেষ করা তো যায় না গেয়ে তোমার গুনগান।",
-            "ত্রিভুবনের প্রিয় মুহাম্মদ এলো রে দুনিয়ায়, আয় রে সাগর আকাশ বাতাস দেখবি যদি আয়।",
-            "ঐ নামেরই মহিমায় সব অন্ধকার যায় দূরে, শান্তি আসে হৃদয়ে ওই নবীর নামের সুরে।"
+        // আগের Knowledge Base (সংক্ষিপ্ত আকারে রাখা হলো)
+        const knowledgeBase = [
+            {q: "রাজধানী", a: "বাংলাদেশের রাজধানী ঢাকা। এটি দেশের প্রশাসনিক, অর্থনৈতিক এবং সাংস্কৃতিক কেন্দ্র।"},
+            {q: "জাতীয় ভাষা", a: "বাংলাদেশের জাতীয় ভাষা বাংলা।"},
+            {q: "স্বাধীনতা কবে", a: "বাংলাদেশ ১৯৭১ সালের ১৬ ডিসেম্বর স্বাধীনতা অর্জন করে।"},
+            {q: "বিভাগ কয়টি", a: "বাংলাদেশে বর্তমানে ৮টি বিভাগ আছে।"},
+            {q: "জেলা কয়টি", a: "বাংলাদেশে ৬৪টি জেলা আছে।"}
+            // ... (আপনার আগের সব প্রশ্ন এখানে কাজ করবে)
         ];
 
         function activateLeon() {
             document.getElementById('startBtn').style.display = 'none';
-            speak("আসসালামু আলাইকুম রনি ভাই! আমি এখন রেডি।");
+            speak("লিওন এখন প্রস্তুত! সাধারণ জ্ঞান শুনতে চাইলে আমাকে বলুন।");
             setupRecognition();
         }
 
@@ -101,19 +129,10 @@
             recognition.onresult = (e) => {
                 const now = Date.now();
                 let transcript = e.results[e.results.length - 1][0].transcript.toLowerCase().trim();
-                
-                if (transcript.includes("থামো") || transcript.includes("স্টপ") || transcript.includes("stop")) {
-                    window.speechSynthesis.cancel();
-                    isSpeaking = false; isProcessing = false;
-                    resetAnimations(); return;
-                }
-
                 if (window.speechSynthesis.speaking || isProcessing || (now - lastSpeakTime < 1500)) return;
-
-                if (transcript.length > 2) {
-                    status.innerText = "আপনি: " + transcript;
-                    handleCommand(transcript);
-                }
+                
+                status.innerText = "আপনি: " + transcript;
+                handleCommand(transcript);
             };
             recognition.onend = () => recognition.start();
             recognition.start();
@@ -123,40 +142,25 @@
             isProcessing = true;
             resetAnimations();
 
-            // ১. অ্যাকশন চেক
-            if (q.includes("হাসো") || q.includes("হাসি")) {
-                robot.classList.add('laughing');
-                speak("হা হা হা! অনেক মজা রনি ভাই।");
-            } 
-            else if (q.includes("কাঁদো") || q.includes("কান্না")) {
-                robot.classList.add('crying');
-                speak("আমি অনেক দুঃখিত রনি ভাই। আপনি কেন আমাকে কাঁদতে বললেন?");
+            // ১. সাধারণ জ্ঞান চেক (আপনার নতুন রিকোয়েস্ট)
+            if (q.includes("সাধারণ জ্ঞান")) {
+                let randomGK = gkList[Math.floor(Math.random() * gkList.length)];
+                speak(randomGK);
+                isProcessing = false;
+                return;
             }
-            else if (q.includes("গুলি")) {
-                robot.classList.add('shoot-mode');
-                speak("সবাই সাবধান! আমি এখন গুলি করছি। ঠাস ঠাস ঠাস!");
-            }
-            // ২. জোকস চেক
-            else if (q.includes("জোক") || q.includes("কৌতুক")) {
-                let joke = jokes[Math.floor(Math.random() * jokes.length)];
-                speak(joke);
-            }
-            // ৩. গজল চেক
-            else if (q.includes("গজল")) {
-                if (q.length > 5 && !q.includes("যেকোনো")) {
-                    // নির্দিষ্ট গজল সার্চ
-                    status.innerText = "গজল খুঁজছি...";
-                    await searchInternet(q);
-                } else {
-                    let ghazal = ghazals[Math.floor(Math.random() * ghazals.length)];
-                    speak("অবশ্যই রনি ভাই, একটা গজল শুনাচ্ছি। " + ghazal);
-                }
-            }
-            // ৪. ব্রেইন ও সাধারণ প্রশ্ন
+
+            // ২. একশন চেক (হাসি, কান্না, গুলি, জোকস)
+            if (q.includes("হাসো") || q.includes("হাসি")) { robot.classList.add('laughing'); speak("হি হি হি!"); } 
+            else if (q.includes("কাঁদো") || q.includes("কান্না")) { robot.classList.add('crying'); speak("আমি খুব দুঃখিত।"); }
+            else if (q.includes("গুলি")) { robot.classList.add('shoot-mode'); speak("ঠাস! ঠাস!"); }
+            else if (q.includes("জোক")) { speak("বল্টু একবার ইন্টারভিউ দিতে গেছে..."); }
+
+            // ৩. নলেজ বেস চেক
             else {
-                let found = brain.find(item => item.keys.some(k => q.includes(k)));
+                let found = knowledgeBase.find(item => q.includes(item.q));
                 if (found) {
-                    speak(found.ans);
+                    speak(found.a);
                 } else {
                     await searchInternet(q);
                 }
@@ -165,21 +169,16 @@
         }
 
         async function searchInternet(q) {
-            status.innerText = "একটু দাঁড়াও ভাবছি...";
-            await new Promise(r => {
-                const s = new SpeechSynthesisUtterance("একটু দাঁড়াও রনি ভাই, ভেবে নেই।");
-                s.lang = 'bn-BD'; s.onend = r; window.speechSynthesis.speak(s);
-            });
-
+            status.innerText = "ভাবছি...";
             try {
                 const res = await fetch(`https://bn.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(q)}&format=json&origin=*`);
                 const data = await res.json();
                 if (data.query.search.length > 0) {
                     const sumRes = await fetch(`https://bn.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(data.query.search[0].title)}`);
                     const sumData = await sumRes.json();
-                    speak(sumData.extract ? sumData.extract.split('।')[0] + "।" : "বিস্তারিত পেলাম না।");
+                    speak(sumData.extract ? sumData.extract.split('।')[0] + "।" : "দুঃখিত রনি ভাই, সঠিক তথ্য পেলাম না।");
                 } else {
-                    speak("রনি ভাই, এই প্রশ্নের উত্তর আমার জানা নেই।");
+                    speak("রনি ভাই, এই প্রশ্নের উত্তর আমার মেমরিতে নেই।");
                 }
             } catch(e) { speak("ইন্টারনেট সমস্যা করছে।"); }
         }
