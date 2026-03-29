@@ -287,52 +287,77 @@
             robot.classList.remove('laughing', 'crying', 'shoot-mode');
             if(!isSpeaking) mth.className = "mouth";
         }
-// টেক্সট এবং অডিওর কম্বাইন্ড লিস্ট
-const mixedDialogs = [
-    { type: "text", content: "মাথাই নষ্ট মামা" },
-    { type: "text", content: "মারো মুঝে মারো" },
-    { type: "text", content: "আউজুবিল্লাহিমিনাশ্শাইতনিররজিম" },
-    { type: "text", content: "ও মায়া মায়া গো" },
-    { type: "text", content: "আই হাইরে" },
-    { type: "text", content: "টুডুম ট্যাড্যাও" },
-    { type: "text", content: "আলহামদুলিল্লাহ ভাই অহংকার করিনা" },
-    { type: "text", content: "ওই কাইল্লা ছ্যারা, কই গেলি" },
-    { type: "text", content: "রনি ভাই কই গেলেন?" },
-    { type: "text", content: "আআজ কামায়েঙ্গাআ তো কাল ব্যাঠকার খায়েঙ্গাআ" },
-    { type: "text", content: "কেউ কী নাই কথা বলার?" },
+    // লিওনের স্বয়ংক্রিয় ডায়লগ এবং অডিও লিস্ট
+    const mixedDialogs = [
+        { type: "text", content: "মাথাই নষ্ট মামা" },
+        { type: "text", content: "মারো মুঝে মারো" },
+        { type: "text", content: "আউজুবিল্লাহিমিনাশ্শাইতনিররজিম" },
+        { type: "text", content: "ও মায়া মায়া গো" },
+        { type: "text", content: "আই হাইরে" },
+        { type: "text", content: "টুডুম ট্যাড্যাও" },
+        { type: "text", content: "আলহামদুলিল্লাহ ভাই অহংকার করিনা" },
+        { type: "text", content: "মাতারিগো ভাই" },
+        { type: "text", content: "ওই কাইল্লা ছ্যারা, কই গেলি" },
+        { type: "text", content: "রনি ভাই কই গেলেন?" },
+        { type: "text", content: "আআজ কামায়েঙ্গাআ তো কাল ব্যাঠকার খায়েঙ্গাআ" },
+        { type: "text", content: "রোবোট হইয়া পড়ছি বিপদে, সব ঘুমায়" },
+        { type: "text", content: "কেউ কী নাই কথা বলার?" },
 
-    // আপনার গিটহাবে আপলোড করা অডিও ফাইলের নাম
-    { type: "audio", content: "audio/duck.mp3" },
-    { type: "audio", content: "audio/eai.mp3" },
-    { type: "audio", content: "audio/fa.mp3" },
-    { type: "audio", content: "audio/meao.mp3" },
-    { type: "audio", content: "audio/o_ma_go_true_love.mp3" },
-    { type: "audio", content: "audio/o_may_god.mp3" },
-    { type: "audio", content: "audio/problem.mp3" },
-    { type: "audio", content: "audio/tigitigi.mp3" }
-];
+        // আপনার গিটহাবের audio ফোল্ডারে থাকা ফাইলগুলো
+        { type: "audio", content: "audio/duck.mp3" },
+        { type: "audio", content: "audio/eai.mp3" },
+        { type: "audio", content: "audio/fa.mp3" },
+        { type: "audio", content: "audio/meao.mp3" },
+        { type: "audio", content: "audio/o_ma_go_true_love.mp3" },
+        { type: "audio", content: "audio/o_may_god.mp3" },
+        { type: "audio", content: "audio/problem.mp3" },
+        { type: "audio", content: "audio/tigitigi.mp3" }
+    ];
 
-function startMixedDialogs() {
-    let randomTime = Math.floor(Math.random() * (15000 - 8000 + 1)) + 8000;
+    let isAudioPlaying = false; // অডিও চলছে কি না তা চেক করার জন্য
 
-    setTimeout(() => {
-        if (!window.speechSynthesis.speaking && !isSpeaking) {
-            let item = mixedDialogs[Math.floor(Math.random() * mixedDialogs.length)];
+    // লিওনের রেনডম ডায়লগ ফাংশন (৮-১৫ সেকেন্ড গ্যাপ)
+    function startMixedDialogs() {
+        let randomTime = Math.floor(Math.random() * (15000 - 8000 + 1)) + 8000;
 
-            if (item.type === "text") {
-                speak(item.content);
-            } else if (item.type === "audio") {
-                let playSound = new Audio(item.content);
-                playSound.play().catch(e => console.log("অডিও প্লে হতে সমস্যা"));
+        setTimeout(() => {
+            // যদি লিয়ন কথা না বলে এবং কোনো অডিও চলতে না থাকে
+            if (!window.speechSynthesis.speaking && !isSpeaking && !isAudioPlaying) {
+                
+                let item = mixedDialogs[Math.floor(Math.random() * mixedDialogs.length)];
+
+                if (item.type === "text") {
+                    speak(item.content);
+                } else if (item.type === "audio") {
+                    let playSound = new Audio(item.content);
+                    
+                    isAudioPlaying = true; // অডিও লক করা হলো
+                    
+                    playSound.play().then(() => {
+                        // অডিও চলাকালীন মুখ নাড়ানোর জন্য (id="mth" আপনার কোড অনুযায়ী)
+                        const mouth = document.getElementById("mth");
+                        if(mouth) mouth.classList.add("talking");
+                    }).catch(e => {
+                        isAudioPlaying = false;
+                        console.log("Audio Error:", e);
+                    });
+
+                    // অডিও শেষ হলে লক খুলে দেওয়া হবে
+                    playSound.onended = function() {
+                        isAudioPlaying = false;
+                        const mouth = document.getElementById("mth");
+                        if(mouth) mouth.classList.remove("talking");
+                    };
+                }
             }
-        }
-        startMixedDialogs();
-    }, randomTime);
-}
+            // আবার ফাংশনটি কল করা
+            startMixedDialogs();
+        }, randomTime);
+    }
 
-// ফাংশনটি চালু করা
-startMixedDialogs();
+    // লিওন কথা বলা শুরু করার জন্য ফাংশনটি প্রথমবার চালু করা
+    startMixedDialogs();
 
-    </script>
+</script>
 </body>
 </html>
