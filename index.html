@@ -287,7 +287,7 @@
             robot.classList.remove('laughing', 'crying', 'shoot-mode');
             if(!isSpeaking) mth.className = "mouth";
         }
-// আপনার ১৩টি ডায়লগ এবং ৮টি অডিওর লিস্ট
+// টেক্সট এবং অডিওর কম্বাইন্ড লিস্ট
 const mixedDialogs = [
     { type: "text", content: "মাথাই নষ্ট মামা" },
     { type: "text", content: "মারো মুঝে মারো" },
@@ -296,14 +296,12 @@ const mixedDialogs = [
     { type: "text", content: "আই হাইরে" },
     { type: "text", content: "টুডুম ট্যাড্যাও" },
     { type: "text", content: "আলহামদুলিল্লাহ ভাই অহংকার করিনা" },
-    { type: "text", content: "মাতারিগো বাই" },
     { type: "text", content: "ওই কাইল্লা ছ্যারা, কই গেলি" },
     { type: "text", content: "রনি ভাই কই গেলেন?" },
     { type: "text", content: "আআজ কামায়েঙ্গাআ তো কাল ব্যাঠকার খায়েঙ্গাআ" },
-    { type: "text", content: "রোবোট হইয়া পড়ছি বিপদে, সব ঘুমায়" },
     { type: "text", content: "কেউ কী নাই কথা বলার?" },
 
-    // আপনার ফোল্ডারের ফাইল নেম অনুযায়ী (বানান একদম ঠিক রাখা হয়েছে)
+    // আপনার গিটহাবে আপলোড করা অডিও ফাইলের নাম
     { type: "audio", content: "audio/duck.mp3" },
     { type: "audio", content: "audio/eai.mp3" },
     { type: "audio", content: "audio/fa.mp3" },
@@ -318,35 +316,21 @@ function startMixedDialogs() {
     let randomTime = Math.floor(Math.random() * (15000 - 8000 + 1)) + 8000;
 
     setTimeout(() => {
-        // লিয়ন বা আপনি কথা না বললে কাজ করবে
         if (!window.speechSynthesis.speaking && !isSpeaking) {
-            
             let item = mixedDialogs[Math.floor(Math.random() * mixedDialogs.length)];
 
             if (item.type === "text") {
                 speak(item.content);
             } else if (item.type === "audio") {
-                // অডিওর জন্য নতুন সিস্টেম
-                let playSound = new Audio();
-                playSound.src = item.content; 
-                playSound.load(); // ফাইলটি আগে লোড করে নেওয়া
-                
-                let playPromise = playSound.play();
-
-                if (playPromise !== undefined) {
-                    playPromise.catch(error => {
-                        console.log("অডিও আটকে গেছে বা ফাইল নেই:", error);
-                        // অডিও না বাজলে লিয়ন যেন অটোমেটিক টেক্সট বলে দেয়
-                        speak("মাথাই নষ্ট"); 
-                    });
-                }
+                let playSound = new Audio(item.content);
+                playSound.play().catch(e => console.log("অডিও প্লে হতে সমস্যা"));
             }
         }
         startMixedDialogs();
     }, randomTime);
 }
 
-// চালু করা
+// ফাংশনটি চালু করা
 startMixedDialogs();
 
     </script>
