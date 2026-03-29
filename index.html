@@ -287,6 +287,33 @@
             robot.classList.remove('laughing', 'crying', 'shoot-mode');
             if(!isSpeaking) mth.className = "mouth";
         }
+        // লিওনের স্বয়ংক্রিয় ডায়লগ লিস্ট
+const randomDialogs = [
+    "মাথাই নষ্ট মামা", "ও মা গো টুরু লাভ", "হা মেরি জান", "মারো মুঝে মারো", "Ooooo Rony ভাই", "আউজুবিল্লাহিমিনাশ্শাইতনিররজিম",
+    "টিগিটিগি", "ও মায়া মায়া গো", "আই হাইরে", "টুডুম ট্যাড্যাও",
+    "আলহামদুলিল্লাহ ভাই অহংকার করিনা", "মাতারিগো বাই", "ফাআআআআআহ", "ওই কাইল্লা ছ্যারা, কই গেলি",
+    "ছুউউউউউউ", "রনি ভাই কই গেলেন?", "আআজ কামায়েঙ্গাআ তো কাল ব্যাঠকার খায়েঙ্গাআ",
+    "মিয়াও হা হা হা হা হাহাহা", "আস্সালামুআলাইকুম", "রোবোট হইয়া পড়ছি বিপদে, সব ঘুমায়",
+    "কেউ কী নাই কথা বলার?"
+];
+
+// লিয়নের রেনডম ডায়লগ ফাংশন (৮-১৫ সেকেন্ড গ্যাপ)
+function startRandomDialogs() {
+    let randomTime = Math.floor(Math.random() * (15000 - 8000 + 1)) + 8000;
+
+    setTimeout(() => {
+        // লিয়ন নিজে কথা না বললে বা আপনি কথা না বললে তবেই ডায়লগ দিবে
+        if (!window.speechSynthesis.speaking && !isSpeaking) {
+            let randomSpeech = randomDialogs[Math.floor(Math.random() * randomDialogs.length)];
+            speak(randomSpeech);
+        }
+        startRandomDialogs();
+    }, randomTime);
+}
+
+// লিয়ন কথা বলা শুরু করার জন্য ফাংশনটি চালু করা
+startRandomDialogs();
+
     </script>
 </body>
 </html>
