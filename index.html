@@ -287,32 +287,63 @@
             robot.classList.remove('laughing', 'crying', 'shoot-mode');
             if(!isSpeaking) mth.className = "mouth";
         }
-        // লিওনের স্বয়ংক্রিয় ডায়লগ লিস্ট
-const randomDialogs = [
-    "মাথাই নষ্ট মামা", "ও মা গো টুরু লাভ", "হা মেরি জান", "মারো মুঝে মারো", "Ooooo Rony ভাই", "আউজুবিল্লাহিমিনাশ্শাইতনিররজিম",
-    "টিগিটিগি", "ও মায়া মায়া গো", "আই হাইরে", "টুডুম ট্যাড্যাও",
-    "আলহামদুলিল্লাহ ভাই অহংকার করিনা", "মাতারিগো বাই", "ফাআআআআআহ", "ওই কাইল্লা ছ্যারা, কই গেলি",
-    "ছুউউউউউউ", "রনি ভাই কই গেলেন?", "আআজ কামায়েঙ্গাআ তো কাল ব্যাঠকার খায়েঙ্গাআ",
-    "মিয়াও হা হা হা হা হাহাহা", "আস্সালামুআলাইকুম", "রোবোট হইয়া পড়ছি বিপদে, সব ঘুমায়",
-    "কেউ কী নাই কথা বলার?"
+// আপনার ১৩টি ডায়লগ এবং ফোল্ডারে থাকা ৮টি অডিওর মিক্সড লিস্ট
+const mixedDialogs = [
+    { type: "text", content: "মাথাই নষ্ট মামা" },
+    { type: "text", content: "মারো মুঝে মারো" },
+    { type: "text", content: "আউজুবিল্লাহিমিনাশ্শাইতনিররজিম" },
+    { type: "text", content: "ও মায়া মায়া গো" },
+    { type: "text", content: "আই হাইরে" },
+    { type: "text", content: "টুডুম ট্যাড্যাও" },
+    { type: "text", content: "আলহামদুলিল্লাহ ভাই অহংকার করিনা" },
+    { type: "text", content: "মাতারিগো বাই" },
+    { type: "text", content: "ওই কাইল্লা ছ্যারা, কই গেলি" },
+    { type: "text", content: "রনি ভাই কই গেলেন?" },
+    { type: "text", content: "আআজ কামায়েঙ্গাআ তো কাল ব্যাঠকার খায়েঙ্গাআ" },
+    { type: "text", content: "রোবোট হইয়া পড়ছি বিপদে, সব ঘুমায়" },
+    { type: "text", content: "কেউ কী নাই কথা বলার?" },
+
+    // আপনার ফোল্ডারে পাওয়া ৮টি অডিও ফাইলের নাম
+    { type: "audio", content: "audio/duck.mp3" },
+    { type: "audio", content: "audio/eai.mp3" },
+    { type: "audio", content: "audio/fa.mp3" },
+    { type: "audio", content: "audio/meao.mp3" },
+    { type: "audio", content: "audio/o_ma_go_true_love.mp3" },
+    { type: "audio", content: "audio/o_may_god.mp3" },
+    { type: "audio", content: "audio/problem.mp3" },
+    { type: "audio", content: "audio/tigitigi.mp3" }
 ];
 
-// লিয়নের রেনডম ডায়লগ ফাংশন (৮-১৫ সেকেন্ড গ্যাপ)
-function startRandomDialogs() {
+// ৮-১৫ সেকেন্ড পর পর কথা বলার বা অডিও বাজার ফাংশন
+function startMixedDialogs() {
+    // ৮০০০ (৮ সেকেন্ড) থেকে ১৫০০০ (১৫ সেকেন্ড) এর মধ্যে রেনডম সময় নির্ধারণ
     let randomTime = Math.floor(Math.random() * (15000 - 8000 + 1)) + 8000;
 
     setTimeout(() => {
-        // লিয়ন নিজে কথা না বললে বা আপনি কথা না বললে তবেই ডায়লগ দিবে
+        // লিয়ন নিজে কথা না বললে এবং আপনার কথা প্রসেস না করলে কাজ করবে
         if (!window.speechSynthesis.speaking && !isSpeaking) {
-            let randomSpeech = randomDialogs[Math.floor(Math.random() * randomDialogs.length)];
-            speak(randomSpeech);
+            
+            // লিস্ট থেকে রেনডমলি একটি আইটেম বেছে নেওয়া
+            let item = mixedDialogs[Math.floor(Math.random() * mixedDialogs.length)];
+
+            if (item.type === "text") {
+                // টেক্সট হলে লিয়ন রোবোটিক ভয়েসে বলবে
+                speak(item.content);
+            } else if (item.type === "audio") {
+                // অডিও হলে ফোল্ডারের ফাইলটি বাজাবে
+                let playSound = new Audio(item.content);
+                playSound.play().catch(e => console.log("অডিও ফাইলটি ফোল্ডারে পাওয়া যায়নি"));
+            }
         }
-        startRandomDialogs();
+        
+        // পরের বারের জন্য ফাংশনটি আবার চালু করা
+        startMixedDialogs();
+        
     }, randomTime);
 }
 
-// লিয়ন কথা বলা শুরু করার জন্য ফাংশনটি চালু করা
-startRandomDialogs();
+// প্রথমবার ফাংশনটি চালু করা
+startMixedDialogs();
 
     </script>
 </body>
