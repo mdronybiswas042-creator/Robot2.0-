@@ -287,7 +287,7 @@
             robot.classList.remove('laughing', 'crying', 'shoot-mode');
             if(!isSpeaking) mth.className = "mouth";
         }
-    // লিওনের ডায়লগ এবং অডিও লিস্ট
+        // লিওনের ডায়লগ এবং অডিও লিস্ট
     const mixedDialogs = [
         { type: "text", content: "মাথাই নষ্ট মামা" },
         { type: "text", content: "মারো মুঝে মারো" },
@@ -316,13 +316,12 @@
     let isAudioPlaying = false; 
 
     function startMixedDialogs() {
-        // আগের কোনো পেন্ডিং টাইমার থাকলে তা পরিষ্কার করা (খন্ড খন্ড ভয়েস বন্ধ করতে)
         if (window.dialogTimer) clearTimeout(window.dialogTimer);
 
         let randomTime = Math.floor(Math.random() * (15000 - 8000 + 1)) + 8000;
 
         window.dialogTimer = setTimeout(() => {
-            // লিয়ন যদি বিজি না থাকে
+            // সংশোধিত লজিক: যখন সবাই চুপ থাকবে তখনই লিয়ন কথা বলবে
             if (!window.speechSynthesis.speaking && !isSpeaking && !isProcessing && !isAudioPlaying) {
                 
                 let item = mixedDialogs[Math.floor(Math.random() * mixedDialogs.length)];
@@ -338,31 +337,29 @@
                         if(mouth) mouth.classList.add("talking");
                     }).catch(e => {
                         isAudioPlaying = false;
+                        startMixedDialogs();
                     });
 
                     playSound.onended = function() {
                         isAudioPlaying = false;
                         const mouth = document.getElementById("mth");
                         if(mouth) mouth.classList.remove("talking");
-                        // অডিও শেষ হলে আবার নতুন করে লুপ শুরু করা
-                        startMixedDialogs();
+                        // অডিও শেষ হলে ২ সেকেন্ড পর নতুন লুপ শুরু
+                        setTimeout(startMixedDialogs, 2000);
                     };
-                    return; // অডিও বাজলে নিচের লুপ কলটা এখানে থামবে, onended এ কল হবে
+                    return; 
                 }
             }
-            // পরবর্তী ডায়লগের জন্য কল
             startMixedDialogs();
         }, randomTime);
     }
 
-    // লুপটি স্টার্ট করা
     startMixedDialogs();
 
-    // আপনি কথা শেষ করার পর যেন লুপ আবার চালু হয়, তার জন্য একটি সেফটি চেক
+    // সেফটি চেক: যদি লুপ থেমে যায় তবে এটি আবার চালু করবে
     setInterval(() => {
         if (!window.speechSynthesis.speaking && !isSpeaking && !isProcessing && !isAudioPlaying) {
-             // যদি লুপ কোনো কারণে বন্ধ হয়ে যায়, এটি আবার ধাক্কা দিয়ে চালু করবে
-             if (!window.dialogTimer) startMixedDialogs();
+             startMixedDialogs();
         }
     }, 20000);
 
