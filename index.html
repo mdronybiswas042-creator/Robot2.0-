@@ -287,7 +287,7 @@
             robot.classList.remove('laughing', 'crying', 'shoot-mode');
             if(!isSpeaking) mth.className = "mouth";
         }
-        // লিওনের ডায়লগ এবং অডিও লিস্ট
+            // লিওনের ডায়লগ এবং অডিও লিস্ট
     const mixedDialogs = [
         { type: "text", content: "মাথাই নষ্ট মামা" },
         { type: "text", content: "মারো মুঝে মারো" },
@@ -316,52 +316,52 @@
     let isAudioPlaying = false; 
 
     function startMixedDialogs() {
-        if (window.dialogTimer) clearTimeout(window.dialogTimer);
-
         let randomTime = Math.floor(Math.random() * (15000 - 8000 + 1)) + 8000;
 
-        window.dialogTimer = setTimeout(() => {
-            // সংশোধিত লজিক: যখন সবাই চুপ থাকবে তখনই লিয়ন কথা বলবে
+        setTimeout(() => {
             if (!window.speechSynthesis.speaking && !isSpeaking && !isProcessing && !isAudioPlaying) {
                 
                 let item = mixedDialogs[Math.floor(Math.random() * mixedDialogs.length)];
 
                 if (item.type === "text") {
                     speak(item.content);
+                    startMixedDialogs();
                 } else if (item.type === "audio") {
                     let playSound = new Audio(item.content);
-                    isAudioPlaying = true; 
                     
-                    playSound.play().then(() => {
-                        const mouth = document.getElementById("mth");
-                        if(mouth) mouth.classList.add("talking");
-                    }).catch(e => {
-                        isAudioPlaying = false;
-                        startMixedDialogs();
-                    });
+                    // ফাইলটি পুরোপুরি ডাউনলোড না হওয়া পর্যন্ত অপেক্ষা করবে (সমাধান)
+                    playSound.oncanplaythrough = function() {
+                        if (!isAudioPlaying) {
+                            isAudioPlaying = true;
+                            playSound.play().then(() => {
+                                const mouth = document.getElementById("mth");
+                                if(mouth) mouth.classList.add("talking");
+                            }).catch(e => {
+                                isAudioPlaying = false;
+                                startMixedDialogs();
+                            });
+                        }
+                    };
 
                     playSound.onended = function() {
                         isAudioPlaying = false;
                         const mouth = document.getElementById("mth");
                         if(mouth) mouth.classList.remove("talking");
-                        // অডিও শেষ হলে ২ সেকেন্ড পর নতুন লুপ শুরু
                         setTimeout(startMixedDialogs, 2000);
                     };
-                    return; 
+
+                    // যদি ফাইল লোড হতে ৫ সেকেন্ডের বেশি লাগে, তবে লুপ রিসেট করবে
+                    setTimeout(() => {
+                        if (!isAudioPlaying) startMixedDialogs();
+                    }, 5000);
                 }
+            } else {
+                startMixedDialogs();
             }
-            startMixedDialogs();
         }, randomTime);
     }
 
     startMixedDialogs();
-
-    // সেফটি চেক: যদি লুপ থেমে যায় তবে এটি আবার চালু করবে
-    setInterval(() => {
-        if (!window.speechSynthesis.speaking && !isSpeaking && !isProcessing && !isAudioPlaying) {
-             startMixedDialogs();
-        }
-    }, 20000);
 
 </script>
 </body>
