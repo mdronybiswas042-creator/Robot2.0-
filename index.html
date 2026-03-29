@@ -331,18 +331,18 @@
                 } else if (item.type === "audio") {
                     let playSound = new Audio(item.content);
                     
-                    isAudioPlaying = true; // অডিও লক করা হলো
+                    isAudioPlaying = true; // অডিও লক করা হলো যাতে অন্য কিছু শুরু না হয়
                     
                     playSound.play().then(() => {
                         // অডিও চলাকালীন মুখ নাড়ানোর জন্য (id="mth" আপনার কোড অনুযায়ী)
                         const mouth = document.getElementById("mth");
                         if(mouth) mouth.classList.add("talking");
                     }).catch(e => {
-                        isAudioPlaying = false;
+                        isAudioPlaying = false; // এরর হলে লক খুলে দেওয়া হবে
                         console.log("Audio Error:", e);
                     });
 
-                    // অডিও শেষ হলে লক খুলে দেওয়া হবে
+                    // অডিওটি পুরোপুরি শেষ হলে তবেই লক খুলে দেওয়া হবে
                     playSound.onended = function() {
                         isAudioPlaying = false;
                         const mouth = document.getElementById("mth");
@@ -350,12 +350,12 @@
                     };
                 }
             }
-            // আবার ফাংশনটি কল করা
+            // পরবর্তী ডায়লগের জন্য ফাংশনটি আবার কল করা
             startMixedDialogs();
         }, randomTime);
     }
 
-    // লিওন কথা বলা শুরু করার জন্য ফাংশনটি প্রথমবার চালু করা
+    // লিয়নকে সক্রিয় করার জন্য ফাংশনটি প্রথমবার চালু করা
     startMixedDialogs();
 
 </script>
