@@ -287,7 +287,7 @@
             robot.classList.remove('laughing', 'crying', 'shoot-mode');
             if(!isSpeaking) mth.className = "mouth";
         }
-                                   // আগের সব টাইমার বন্ধ করার জন্য
+                                       // আগের সব টাইমার বন্ধ করা
     if (window.leonTimer) clearTimeout(window.leonTimer);
     if (window.leonSafety) clearInterval(window.leonSafety);
 
@@ -317,35 +317,51 @@
     ];
 
     let leonStatus = "idle";
+    const audioCache = {}; // অডিও জমা রাখার ঘর
 
-    // অডিও স্মুথলি প্লে করার জন্য (Fetch API ব্যবহার করে)
+    // পেজ লোড হওয়ার সাথে সাথে সব অডিও ডাউনলোড করে ক্যাশ করা হবে
+    async function preloadAudios() {
+        console.log("Loading audios...");
+        for (let item of mixedDialogs) {
+            if (item.type === "audio") {
+                try {
+                    const response = await fetch(item.content);
+                    const blob = await response.blob();
+                    audioCache[item.content] = URL.createObjectURL(blob);
+                } catch (e) {
+                    console.error("Failed to load:", item.content);
+                }
+            }
+        }
+        console.log("All audios ready!");
+        startLeonLoop(); // লোড শেষ হলে লুপ শুরু হবে
+    }
+
     async function playAudioSmoothly(url) {
-        try {
-            leonStatus = "playing";
-            const response = await fetch(url);
-            const blob = await response.blob();
-            const audioUrl = URL.createObjectURL(blob);
-            const playSound = new Audio(audioUrl);
+        const cachedUrl = audioCache[url] || url; // ক্যাশ থাকলে সেটা নিবে, নাহলে ডিরেক্ট ইউআরএল
+        leonStatus = "playing";
+        
+        const playSound = new Audio(cachedUrl);
+        
+        playSound.play().then(() => {
+            const mouth = document.getElementById("mth");
+            if(mouth) mouth.classList.add("talking");
+        }).catch(() => { 
+            leonStatus = "idle"; 
+            startLeonLoop(); 
+        });
 
-            playSound.play().then(() => {
-                const mouth = document.getElementById("mth");
-                if(mouth) mouth.classList.add("talking");
-            }).catch(() => { 
-                leonStatus = "idle"; 
-                startLeonLoop(); 
-            });
+        playSound.onended = function() {
+            leonStatus = "idle";
+            const mouth = document.getElementById("mth");
+            if(mouth) mouth.classList.remove("talking");
+            startLeonLoop();
+        };
 
-            playSound.onended = function() {
-                leonStatus = "idle";
-                const mouth = document.getElementById("mth");
-                if(mouth) mouth.classList.remove("talking");
-                URL.revokeObjectURL(audioUrl); // মেমোরি পরিষ্কার
-                startLeonLoop();
-            };
-        } catch (e) {
+        playSound.onerror = function() {
             leonStatus = "idle";
             startLeonLoop();
-        }
+        };
     }
 
     function startLeonLoop() {
@@ -370,10 +386,9 @@
         }, waitTime);
     }
 
-    // লুপ শুরু করা
-    startLeonLoop();
+    // শুরুতে প্রি-লোড কল করা হলো
+    preloadAudios();
 
-    // সেফটি চেক: যদি কোনো কারণে লুপ আটকে যায়
     window.leonSafety = setInterval(() => {
         if (leonStatus === "idle" && !window.speechSynthesis.speaking && !isSpeaking) {
             startLeonLoop();
