@@ -287,7 +287,7 @@
             robot.classList.remove('laughing', 'crying', 'shoot-mode');
             if(!isSpeaking) mth.className = "mouth";
         }
-                    // লিওনের ডায়লগ এবং অডিও লিস্ট
+                        // লিওনের ডায়লগ এবং অডিও লিস্ট
     const mixedDialogs = [
         { type: "text", content: "মাথাই নষ্ট মামা" },
         { type: "text", content: "মারো মুঝে মারো" },
@@ -313,52 +313,52 @@
         { type: "audio", content: "audio/tigitigi.mp3" }
     ];
 
-    // একটি গ্লোবাল অডিও প্লেয়ার তৈরি করা হলো
-    const leonAudioPlayer = new Audio();
-    leonAudioPlayer.preload = "auto"; 
     let isAudioPlaying = false;
+
+    async function playAudioSmoothly(url) {
+        try {
+            isAudioPlaying = true;
+            // ফাইলটি একবারে পুরোটা ডাউনলোড করে মেমোরিতে নেওয়া হচ্ছে
+            const response = await fetch(url);
+            const blob = await response.blob();
+            const audioUrl = URL.createObjectURL(blob);
+            const playSound = new Audio(audioUrl);
+
+            playSound.play().then(() => {
+                const mouth = document.getElementById("mth");
+                if(mouth) mouth.classList.add("talking");
+            }).catch(e => {
+                isAudioPlaying = false;
+                startMixedDialogs();
+            });
+
+            playSound.onended = function() {
+                isAudioPlaying = false;
+                const mouth = document.getElementById("mth");
+                if(mouth) mouth.classList.remove("talking");
+                // মেমোরি খালি করা
+                URL.revokeObjectURL(audioUrl);
+                setTimeout(startMixedDialogs, 2000);
+            };
+        } catch (error) {
+            console.error("Audio Load Error:", error);
+            isAudioPlaying = false;
+            startMixedDialogs();
+        }
+    }
 
     function startMixedDialogs() {
         let randomTime = Math.floor(Math.random() * (15000 - 8000 + 1)) + 8000;
 
         setTimeout(() => {
-            // সেফটি চেক
             if (!window.speechSynthesis.speaking && !isSpeaking && !isProcessing && !isAudioPlaying) {
-                
                 let item = mixedDialogs[Math.floor(Math.random() * mixedDialogs.length)];
 
                 if (item.type === "text") {
                     speak(item.content);
                     startMixedDialogs();
                 } else if (item.type === "audio") {
-                    isAudioPlaying = true;
-                    leonAudioPlayer.src = item.content;
-                    leonAudioPlayer.load(); // ফাইল লোড করা শুরু করবে
-
-                    // যখন অডিও ফাইল প্লে করার জন্য রেডি হবে
-                    leonAudioPlayer.oncanplaythrough = function() {
-                        leonAudioPlayer.play().then(() => {
-                            const mouth = document.getElementById("mth");
-                            if(mouth) mouth.classList.add("talking");
-                        }).catch(e => {
-                            isAudioPlaying = false;
-                            startMixedDialogs();
-                        });
-                        // ইভেন্টটি একবারই কাজ করবে
-                        leonAudioPlayer.oncanplaythrough = null;
-                    };
-
-                    leonAudioPlayer.onended = function() {
-                        isAudioPlaying = false;
-                        const mouth = document.getElementById("mth");
-                        if(mouth) mouth.classList.remove("talking");
-                        setTimeout(startMixedDialogs, 2000);
-                    };
-
-                    leonAudioPlayer.onerror = function() {
-                        isAudioPlaying = false;
-                        startMixedDialogs();
-                    };
+                    playAudioSmoothly(item.content);
                 }
             } else {
                 startMixedDialogs();
@@ -366,7 +366,6 @@
         }, randomTime);
     }
 
-    // লুপ শুরু
     startMixedDialogs();
 
 </script>
