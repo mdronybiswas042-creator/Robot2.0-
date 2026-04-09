@@ -287,7 +287,7 @@
             robot.classList.remove('laughing', 'crying', 'shoot-mode');
             if(!isSpeaking) mth.className = "mouth";
         }
-                        // লিওনের ডায়লগ এবং অডিও লিস্ট
+                           // লিওনের ডায়লগ এবং অডিও লিস্ট
     const mixedDialogs = [
         { type: "text", content: "মাথাই নষ্ট মামা" },
         { type: "text", content: "মারো মুঝে মারো" },
@@ -313,61 +313,66 @@
         { type: "audio", content: "audio/tigitigi.mp3" }
     ];
 
-    let isAudioPlaying = false;
-
-    async function playAudioSmoothly(url) {
-        try {
-            isAudioPlaying = true;
-            // ফাইলটি একবারে পুরোটা ডাউনলোড করে মেমোরিতে নেওয়া হচ্ছে
-            const response = await fetch(url);
-            const blob = await response.blob();
-            const audioUrl = URL.createObjectURL(blob);
-            const playSound = new Audio(audioUrl);
-
-            playSound.play().then(() => {
-                const mouth = document.getElementById("mth");
-                if(mouth) mouth.classList.add("talking");
-            }).catch(e => {
-                isAudioPlaying = false;
-                startMixedDialogs();
-            });
-
-            playSound.onended = function() {
-                isAudioPlaying = false;
-                const mouth = document.getElementById("mth");
-                if(mouth) mouth.classList.remove("talking");
-                // মেমোরি খালি করা
-                URL.revokeObjectURL(audioUrl);
-                setTimeout(startMixedDialogs, 2000);
-            };
-        } catch (error) {
-            console.error("Audio Load Error:", error);
-            isAudioPlaying = false;
-            startMixedDialogs();
-        }
-    }
+    let isLeonBusy = false; // একদম কঠোর লক সিস্টেম
 
     function startMixedDialogs() {
+        // যদি লিয়ন বিজি থাকে, তবে নতুন করে টাইমার সেট করার দরকার নেই
+        if (isLeonBusy) return;
+
         let randomTime = Math.floor(Math.random() * (15000 - 8000 + 1)) + 8000;
 
-        setTimeout(() => {
-            if (!window.speechSynthesis.speaking && !isSpeaking && !isProcessing && !isAudioPlaying) {
+        setTimeout(async () => {
+            // সেফটি চেক: লিয়ন কি আসলেই ফ্রি?
+            if (!window.speechSynthesis.speaking && !isSpeaking && !isProcessing && !isLeonBusy) {
+                
+                isLeonBusy = true; // লক করে দিলাম
                 let item = mixedDialogs[Math.floor(Math.random() * mixedDialogs.length)];
 
                 if (item.type === "text") {
                     speak(item.content);
-                    startMixedDialogs();
+                    // টেক্সট বলা শেষ হওয়া পর্যন্ত অপেক্ষা করার জন্য একটি ছোট গ্যাপ
+                    setTimeout(() => {
+                        isLeonBusy = false;
+                        startMixedDialogs();
+                    }, 5000); 
                 } else if (item.type === "audio") {
-                    playAudioSmoothly(item.content);
+                    try {
+                        const playSound = new Audio(item.content);
+                        
+                        playSound.onplay = () => {
+                            const mouth = document.getElementById("mth");
+                            if(mouth) mouth.classList.add("talking");
+                        };
+
+                        playSound.onended = () => {
+                            isLeonBusy = false;
+                            const mouth = document.getElementById("mth");
+                            if(mouth) mouth.classList.remove("talking");
+                            startMixedDialogs(); // অডিও শেষ হলে নতুন করে শুরু
+                        };
+
+                        playSound.onerror = () => {
+                            isLeonBusy = false;
+                            startMixedDialogs();
+                        };
+
+                        await playSound.play();
+                    } catch (e) {
+                        isLeonBusy = false;
+                        startMixedDialogs();
+                    }
                 }
             } else {
-                startMixedDialogs();
+                // যদি বিজি থাকে, তবে ২ সেকেন্ড পর আবার চেক করবে
+                setTimeout(startMixedDialogs, 2000);
             }
         }, randomTime);
     }
 
+    // লুপ শুরু
     startMixedDialogs();
 
 </script>
 </body>
 </html>
+ 
