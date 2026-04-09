@@ -287,7 +287,7 @@
             robot.classList.remove('laughing', 'crying', 'shoot-mode');
             if(!isSpeaking) mth.className = "mouth";
         }
-                                           // আগের সব টাইমার এবং সেফটি চেক পরিষ্কার করা
+                                               // আগের সব টাইমার পরিষ্কার করা
     if (window.leonTimer) clearTimeout(window.leonTimer);
     if (window.leonSafety) clearInterval(window.leonSafety);
 
@@ -316,98 +316,79 @@
         { type: "audio", content: "audio/tigitigi.mp3" }
     ];
 
-    let leonStatus = "idle"; // idle, speaking, playing
-    const audioCache = {}; // অডিও মেমোরিতে জমা রাখার ঘর
+    let leonStatus = "idle";
+    const audioCache = {};
 
-    // পেজ লোড হওয়ার সাথে সাথে সব অডিও ডাউনলোড করে ক্যাশ (Pre-load) করা হবে
+    // প্রি-লোড সিস্টেম (অডিও কাটার সমাধান)
     async function preloadAudios() {
-        console.log("Loading all audios into memory...");
         for (let item of mixedDialogs) {
             if (item.type === "audio") {
                 try {
-                    // ফাইলটি একবারে পুরোটা ডাউনলোড করে মেমোরিতে নেওয়া হচ্ছে
                     const response = await fetch(item.content);
                     const blob = await response.blob();
                     audioCache[item.content] = URL.createObjectURL(blob);
-                } catch (e) {
-                    console.error("Failed to preload:", item.content, e);
-                }
+                } catch (e) { console.log("Failed:", item.content); }
             }
         }
-        console.log("All audios are ready in memory! Starting loop...");
-        startLeonLoop(); // লোড শেষ হলে লুপ শুরু হবে
+        console.log("Audios Ready!");
+        startLeonLoop();
     }
 
-    async function playAudioSmoothly(url) {
-        if (leonStatus !== "idle") return; // সেফটি চেক
-        
+    function playAudioSmoothly(url) {
+        // নতুন অডিওর আগে সবকিছু জোর করে বন্ধ
+        window.speechSynthesis.cancel();
         leonStatus = "playing";
-        const cachedUrl = audioCache[url] || url; // ক্যাশ থাকলে সেটা নিবে
         
+        const cachedUrl = audioCache[url] || url;
         const playSound = new Audio(cachedUrl);
         
         playSound.play().then(() => {
-            const mouth = document.getElementById("mth");
-            if(mouth) mouth.classList.add("talking");
-        }).catch((e) => { 
-            console.error("Audio play failed:", e);
-            leonStatus = "idle"; 
-            startLeonLoop(); 
-        });
+            document.getElementById("mth")?.classList.add("talking");
+        }).catch(() => { resetToIdle(); });
 
-        playSound.onended = function() {
-            leonStatus = "idle";
-            const mouth = document.getElementById("mth");
-            if(mouth) mouth.classList.remove("talking");
-            // অডিও শেষ হওয়ার ২ সেকেন্ড পর নতুন লুপ শুরু হবে
-            setTimeout(startLeonLoop, 2000);
-        };
+        playSound.onended = () => { resetToIdle(); };
+        playSound.onerror = () => { resetToIdle(); };
+    }
 
-        playSound.onerror = function() {
-            console.error("Audio error during playback");
-            leonStatus = "idle";
-            startLeonLoop();
-        };
+    function resetToIdle() {
+        leonStatus = "idle";
+        isSpeaking = false; // ভেরিয়েবল রিসেট
+        isProcessing = false; // ভেরিয়েবল রিসেট
+        document.getElementById("mth")?.classList.remove("talking");
+        if (window.leonTimer) clearTimeout(window.leonTimer);
+        window.leonTimer = setTimeout(startLeonLoop, 8000);
     }
 
     function startLeonLoop() {
-        if (leonStatus !== "idle") return;
+        // যদি লিয়ন কথা বলছে বা আপনি কথা বলছেন, তবে ৩ সেকেন্ড পর আবার চেক করবে
+        if (window.speechSynthesis.speaking || isSpeaking || isProcessing || leonStatus !== "idle") {
+            if (window.leonTimer) clearTimeout(window.leonTimer);
+            window.leonTimer = setTimeout(startLeonLoop, 3000);
+            return;
+        }
 
-        let waitTime = Math.floor(Math.random() * (15000 - 10000 + 1)) + 10000;
+        let item = mixedDialogs[Math.floor(Math.random() * mixedDialogs.length)];
 
-        window.leonTimer = setTimeout(() => {
-            // চেক: লিয়ন নিজে কথা বলছে না, আপনি কথা বলছেন না, প্রসেসিং হচ্ছে না, লিয়ন ফ্রি আছে
-            if (!window.speechSynthesis.speaking && !isSpeaking && !isProcessing && leonStatus === "idle") {
-                
-                let item = mixedDialogs[Math.floor(Math.random() * mixedDialogs.length)];
-
-                if (item.type === "text") {
-                    leonStatus = "speaking";
-                    speak(item.content);
-                    // টেক্সট ডায়লগের জন্য সেফটি গ্যাপ (৭ সেকেন্ড)
-                    setTimeout(() => { 
-                        leonStatus = "idle"; 
-                        startLeonLoop(); 
-                    }, 7000);
-                } else if (item.type === "audio") {
-                    playAudioSmoothly(item.content);
-                }
-            } else {
-                // যদি লিয়ন বিজি থাকে, তবে ৩ সেকেন্ড পর আবার চেক করবে
-                setTimeout(startLeonLoop, 3000);
-            }
-        }, waitTime);
+        if (item.type === "text") {
+            leonStatus = "speaking";
+            speak(item.content);
+            // ৬ সেকেন্ড পর সেফটি রিসেট (যাতে লুপ আটকে না যায়)
+            setTimeout(resetToIdle, 6000);
+        } else {
+            playAudioSmoothly(item.content);
+        }
     }
 
-    // শুরুতে সব অডিও মেমোরিতে লোড করা শুরু হবে
+    // শুরুতে লোড করা
     preloadAudios();
 
-    // সেফটি গিয়ার: প্রতি ৩০ সেকেন্ডে একবার চেক করবে লুপটা জ্যান্ত আছে কি না
+    // সেফটি গিয়ার (মাস্টার রিসেট)
     window.leonSafety = setInterval(() => {
-        if (leonStatus === "idle" && !window.speechSynthesis.speaking && !isSpeaking && !isProcessing) {
-             startLeonLoop();
+        if (!window.speechSynthesis.speaking && leonStatus === "idle") {
+            isSpeaking = false;
+            isProcessing = false;
         }
-    }, 30000);
+    }, 15000);
 
 </script>
 </body>
