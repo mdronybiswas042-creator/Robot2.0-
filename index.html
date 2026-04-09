@@ -287,7 +287,7 @@
             robot.classList.remove('laughing', 'crying', 'shoot-mode');
             if(!isSpeaking) mth.className = "mouth";
         }
-                // লিওনের ডায়লগ এবং অডিও লিস্ট
+                    // লিওনের ডায়লগ এবং অডিও লিস্ট
     const mixedDialogs = [
         { type: "text", content: "মাথাই নষ্ট মামা" },
         { type: "text", content: "মারো মুঝে মারো" },
@@ -313,62 +313,61 @@
         { type: "audio", content: "audio/tigitigi.mp3" }
     ];
 
-    let isAudioPlaying = false; 
-    let dialogTimeout = null; // টাইমার ট্র্যাক করার জন্য
+    // একটি গ্লোবাল অডিও প্লেয়ার তৈরি করা হলো
+    const leonAudioPlayer = new Audio();
+    leonAudioPlayer.preload = "auto"; 
+    let isAudioPlaying = false;
 
     function startMixedDialogs() {
-        // যদি অলরেডি কোনো টাইমার চলে, তবে নতুন করে শুরু করার দরকার নেই
-        if (dialogTimeout) clearTimeout(dialogTimeout);
-
         let randomTime = Math.floor(Math.random() * (15000 - 8000 + 1)) + 8000;
 
-        dialogTimeout = setTimeout(() => {
-            // চেক: লিয়ন নিজে কথা বলছে না, আপনি কথা বলছেন না, প্রসেসিং হচ্ছে না, অডিও বাজছে না
+        setTimeout(() => {
+            // সেফটি চেক
             if (!window.speechSynthesis.speaking && !isSpeaking && !isProcessing && !isAudioPlaying) {
                 
                 let item = mixedDialogs[Math.floor(Math.random() * mixedDialogs.length)];
 
                 if (item.type === "text") {
                     speak(item.content);
-                    // টেক্সট ডায়লগ শেষ হলে ৮-১৫ সেকেন্ড পর আবার লুপ কল হবে
                     startMixedDialogs();
                 } else if (item.type === "audio") {
-                    let playSound = new Audio(item.content);
-                    isAudioPlaying = true; 
-                    
-                    playSound.play().then(() => {
-                        const mouth = document.getElementById("mth");
-                        if(mouth) mouth.classList.add("talking");
-                    }).catch(e => {
-                        isAudioPlaying = false;
-                        startMixedDialogs();
-                    });
+                    isAudioPlaying = true;
+                    leonAudioPlayer.src = item.content;
+                    leonAudioPlayer.load(); // ফাইল লোড করা শুরু করবে
 
-                    playSound.onended = function() {
+                    // যখন অডিও ফাইল প্লে করার জন্য রেডি হবে
+                    leonAudioPlayer.oncanplaythrough = function() {
+                        leonAudioPlayer.play().then(() => {
+                            const mouth = document.getElementById("mth");
+                            if(mouth) mouth.classList.add("talking");
+                        }).catch(e => {
+                            isAudioPlaying = false;
+                            startMixedDialogs();
+                        });
+                        // ইভেন্টটি একবারই কাজ করবে
+                        leonAudioPlayer.oncanplaythrough = null;
+                    };
+
+                    leonAudioPlayer.onended = function() {
                         isAudioPlaying = false;
                         const mouth = document.getElementById("mth");
                         if(mouth) mouth.classList.remove("talking");
-                        // অডিও পুরোপুরি শেষ হওয়ার ২ সেকেন্ড পর নতুন লুপ শুরু হবে
                         setTimeout(startMixedDialogs, 2000);
+                    };
+
+                    leonAudioPlayer.onerror = function() {
+                        isAudioPlaying = false;
+                        startMixedDialogs();
                     };
                 }
             } else {
-                // যদি লিয়ন বিজি থাকে, তবে ৩ সেকেন্ড পর আবার চেক করবে
                 startMixedDialogs();
             }
         }, randomTime);
     }
 
-    // প্রথমবার লুপ চালু করা
+    // লুপ শুরু
     startMixedDialogs();
-
-    // সেফটি গিয়ার: প্রতি ৩০ সেকেন্ডে একবার চেক করবে লুপটা জ্যান্ত আছে কি না
-    setInterval(() => {
-        if (!window.speechSynthesis.speaking && !isSpeaking && !isProcessing && !isAudioPlaying) {
-             // যদি টাইমার কোনো কারণে হারিয়ে যায়, তবেই কল হবে
-             if (!dialogTimeout) startMixedDialogs();
-        }
-    }, 30000);
 
 </script>
 </body>
