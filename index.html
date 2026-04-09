@@ -40,6 +40,31 @@
 
         #status { font-weight: 600; margin-top: 40px; color: #444; height: 35px; text-align: center; font-size: 17px; }
         .btn { background: #1a1a1a; color: #fff; border: none; padding: 15px 45px; border-radius: 50px; cursor: pointer; margin-top: 20px; font-weight: bold; font-size: 18px; }
+           /* চোখের পলক ও নড়াচড়া */
+        @keyframes eyesBlink {
+            0%, 88%, 100% { transform: scaleY(1); }
+            92% { transform: scaleY(0.1); }
+        }
+        @keyframes movePupil {
+            0%, 20%, 80%, 100% { transform: translate(0, 0); }
+            30% { transform: translate(-6px, 0); }
+            50% { transform: translate(6px, 0); }
+            65% { transform: translate(0, -4px); }
+        }
+        @keyframes eyeSquint {
+            0%, 100% { height: 45px; }
+            40%, 60% { height: 25px; }
+        }
+
+        .eye {
+            animation: eyesBlink 5s infinite, eyeSquint 12s infinite;
+            position: relative;
+        }
+
+        .eye::after {
+            animation: movePupil 7s infinite ease-in-out;
+        }
+
     </style>
 </head>
 <body>
