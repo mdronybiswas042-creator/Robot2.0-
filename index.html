@@ -14,84 +14,112 @@
         border-radius: 35px; position: relative; z-index: 2; overflow: hidden;
     }
 
-    /* চোখের পালক এবং নড়াচড়ার বাস্তবভিত্তিক CSS (Fast Movement) */
-    .eyes {
-        display: flex; justify-content: space-around; width: 100%;
-        margin-top: 55px; padding: 0 30px; box-sizing: border-box; position: relative;
-    }
+            /* চোখের পালক এবং নড়াচড়ার বাস্তবভিত্তিক CSS (Fast Movement) */
+        .eyes {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-top: 55px;
+            padding: 0 30px;
+            box-sizing: border-box;
+            position: relative;
+        }
 
-    .eye {
-        width: 45px; height: 45px; background: #1a1a1a; 
-        border-radius: 50%; /* গোল চোখ নিশ্চিত করা হলো */
-        position: relative; overflow: hidden; border: 2px solid #fff; box-sizing: border-box;
-        transition: transform 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    }
+        .eye {
+            width: 45px;
+            height: 45px;
+            background: #1a1a1a;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid #fff;
+            box-sizing: border-box;
+            
+            /* দ্রুত নড়াচড়ার জন্য transition (cubic-bezier বাস্তবসম্মত ত্বরণ দেয়) */
+            transition: transform 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
 
-    /* চোখের পাতা (Eyelid) - বাস্তবসম্মত পলক */
-    .eye::before {
-        content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 0;
-        background: #fff; z-index: 2; border-radius: 0 0 50% 50%;
-        animation: lidBlink 3.8s infinite cubic-bezier(0.5, 0, 0.75, 0);
-    }
+        /* চোখের পাতা (Eyelid) - উপর থেকে নিচে কাভার করবে */
+        .eye::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 0;
+            background: #fff;
+            z-index: 2;
+            
+            /* স্বাভাবিক চোখের পালক ফেলার CSS-only অ্যানিমেশন (সব সময় চলবে) */
+            animation: lidBlink 3.8s infinite cubic-bezier(0.5, 0, 0.75, 0);
+            border-radius: 0 0 10px 10px; /* যাতে একটু কার্ভ হয় */
+        }
 
-    @keyframes lidBlink {
-        0%, 96%, 100% { height: 0; }
-        98% { height: 100%; }
-    }
+        /* বাস্তবভিত্তিক চোখের পালক ফেলার keyframes */
+        @keyframes lidBlink {
+            0%, 96%, 100% { height: 0; }
+            98% { height: 100%; } /* দ্রুত বন্ধ হওয়া */
+        }
 
-    /* চোখের মণি (Pupil) */
-    .eye::after {
-        content: ''; position: absolute; width: 12px; height: 12px;
-        background: #fff; border-radius: 50%; top: 6px; left: 6px;
-        z-index: 1; transition: transform 0.1s ease-out;
-    }
+        /* চোখের মণি (Pupil) */
+        .eye::after {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #fff;
+            border-radius: 50%;
+            top: 6px;
+            left: 5px; /* স্বাভাবিক পজিশন */
+            z-index: 1;
+            box-shadow: inset -2px -2px 0 #ddd;
+            
+            /* মণি নড়াচড়ার দ্রুত গতি */
+            transition: transform 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
 
-    /* মুখ এবং কথা বলার এনিমেশন */
-    .mouth {
-        width: 45px; height: 6px; background: var(--line); margin: 35px auto 0;
-        border-radius: 10px; transition: 0.3s;
-    }
+        /* ==== special states managed by JS classes applied to .robot ==== */
 
-    /* কথা বলার সময় এই ক্লাসটি JS দিয়ে যুক্ত হবে */
-    .talking { animation: mouthMove 0.18s infinite alternate; }
-    @keyframes mouthMove {
-        0% { height: 6px; width: 45px; border-radius: 10px; }
-        100% { height: 20px; width: 35px; border-radius: 50%; }
-    }
+        /* ১. সাধারণ তাকানো - লুপের সময় randomly trigger হবে */
+        
+        /* ডানে তাকানো */
+        .robot.look-right .eye { transform: translateX(4px); }
+        .robot.look-right .eye::after { transform: translateX(8px); }
 
-    /* ==== আপনার দেওয়া ছবির এক্সপ্রেশনগুলো (Classes) ==== */
+        /* বামে তাকানো */
+        .robot.look-left .eye { transform: translateX(-4px); }
+        .robot.look-left .eye::after { transform: translateX(-8px); }
 
-    /* ১. দুঃখিত বা মায়া লাগা চোখ (Sad Expression) */
-    .robot.sad .eye::before { 
-        height: 30%; transform: rotate(15deg); border-radius: 0 0 20px 20px; animation: none; 
-    }
-    .robot.sad .eye#rt::before { transform: rotate(-15deg); }
+        /* ২. রাগান্বিত চোখ (Angry Eyes) - image 14 এর ৩ নম্বর ছবি */
+        /* যখন .angry ক্লাস `.robot` এ থাকবে */
+        .robot.angry .eye::before {
+            animation: none !important; /* normal blink বন্ধ */
+            height: 45%; /* চোখের পাতা অর্ধেক নামানো */
+            background: #ff5e3a; /* লালচে পাতা */
+            transform: rotate(15px) translateY(-5px); /* বাঁকানো ভ্রু */
+            border-radius: 0 0 12px 12px;
+        }
 
-    /* ২. অর্ধেক খোলা চোখ (Squint/Sleepy) */
-    .robot.squint .eye::before { height: 45%; animation: none; }
+        /* রাগান্বিত চোখের মণি */
+        .robot.angry .eye::after {
+            top: auto;
+            bottom: 3px;
+            transform: scaleY(0.6);
+        }
 
-    /* ৩. রাগান্বিত চোখ (Angry) */
-    .robot.angry .eye::before { 
-        height: 50%; background: #1a1a1a; border-bottom: 3px solid #fff;
-        transform: translateY(-5px) rotate(-15deg); animation: none; 
-    }
-    .robot.angry .eye#rt::before { transform: translateY(-5px) rotate(15deg); }
+        /* ৩. গুলী করার সময় Eyes */
+        .robot.shoot-mode .eye::before {
+            animation: none !important;
+            height: 45%;
+            background: red;
+            transform: rotate(-15px) translateY(-5px);
+        }
+        
+        .robot.shoot-mode .eye::after {
+            display: none; /* মণি উধাও */
+        }
 
-    /* ৪. এক চোখ বন্ধ বা ইশারা (Wink) */
-    .robot.wink .eye#rt::before { height: 100%; animation: none; }
-
-    /* ডানে-বামে তাকানো */
-    .robot.look-right .eye::after { transform: translateX(8px); }
-    .robot.look-left .eye::after { transform: translateX(-8px); }
-
-    /* অন্যান্য বডি পার্টস */
-    .body-container { width: 155px; height: 175px; background: #fff; border: 5px solid var(--line); border-radius: 45px; margin-top: -15px; position: relative; }
-    .arm { position: absolute; top: 25px; width: 26px; height: 115px; background: #fff; border: 4px solid var(--line); border-radius: 20px; }
-    .left { left: -42px; transform: rotate(18deg); }
-    .right { right: -42px; transform: rotate(-18deg); }
-
-    #status { font-weight: 600; margin-top: 40px; color: #444; height: 35px; text-align: center; }
-    .btn { background: #1a1a1a; color: #fff; border: none; padding: 15px 45px; border-radius: 50px; cursor: pointer; }
+        /* পুরনো eyeSquint এবং movePupil এর keyframes পুরোপুরি বাদ */
 
 
     </style>
@@ -344,7 +372,12 @@ let isProcessing = false;
             robot.classList.remove('laughing', 'crying', 'shoot-mode');
             if(!isSpeaking) mth.className = "mouth";
         }
-                                                   // লিয়নের ডায়লগ এবং অডিও লজিক
+                                                   
+
+        }, waitTime);
+    }
+
+    // লিয়নের ডায়লগ এবং অডিও লজিক
     
     // আগের সব টাইমার পরিষ্কার (safety check)
     if (window.leonTimer) clearTimeout(window.leonTimer);
@@ -459,152 +492,6 @@ let isProcessing = false;
 
         }, waitTime);
     }
-    // লিয়নের ডায়লগ এবং অডিও লজিক - মুখ নড়াচড়া এবং বিশেষ চোখের এক্সপ্রেশন ফিক্স
-    
-    // আগের সব টাইমার পরিষ্কার (safety check)
-    if (window.leonTimer) clearTimeout(window.leonTimer);
-    if (window.leonSafety) clearInterval(window.leonSafety);
-
-    // ১. রাগান্বিত চোখের (Angry Eyes) ডায়লগ লিস্ট
-    const angryTextDialogs = [
-        "কেউ কী নাই কথা বলার",
-        "ওই কাইল্লা ছ্যারা, কই গেলি"
-    ];
-
-    // ২. রাগান্বিত চোখের অডিও ফাইল লিস্ট
-    const angryAudioURLs = [
-        "audio/eai.mp3",
-        "audio/problem.mp3"
-    ];
-
-    const mixedDialogs = [
-        { type: "text", content: "মাথাই নষ্ট মামা" },
-        { type: "text", content: "মারো মুঝে মারো" },
-        { type: "text", content: "আউজুবিল্লাহিমিনাশ্শাইতনিররজিম" },
-        { type: "text", content: "ও মায়া মায়া গো" },
-        { type: "text", content: "আই হাইরে" },
-        { type: "text", content: "টুডুম ট্যাড্যাও" },
-        { type: "text", content: "আলহামদুলিল্লাহ ভাই অহংকার করিনা" },
-        { type: "text", content: "মাতারিগো ভাই" },
-        ...angryTextDialogs.map(text => ({ type: "text", content: text })), // angry text list যোগ হলো
-        { type: "text", content: "রনি ভাই কই গেলেন?" },
-        { type: "text", content: "আআজ কামায়েঙ্গাআ তো কাল ব্যাঠকার খায়েঙ্গাআ" },
-        { type: "text", content: "রোবোট হইয়া পড়ছি বিপদে, সব ঘুমায়" },
-
-        { type: "audio", content: "audio/duck.mp3" },
-        ...angryAudioURLs.map(url => ({ type: "audio", content: url })), // angry audio list যোগ হলো
-        { type: "audio", content: "audio/fa.mp3" },
-        { type: "audio", content: "audio/meao.mp3" },
-        { type: "audio", content: "audio/o_ma_go_true_love.mp3" },
-        { type: "audio", content: "audio/o_may_god.mp3" },
-        { type: "audio", content: "audio/tigitigi.mp3" }
-    ];
-
-    let leonStatus = "idle";
-    const audioCache = {};
-    window.gazeTimer = null; // তাকানোর টাইমার
-
-    // সব অডিও আগেই ডাউনলোড করার ফাংশন
-    async function preloadAudios() {
-        console.log("Loading all audios for instant playback...");
-        for (let item of mixedDialogs) {
-            if (item.type === "audio") {
-                try {
-                    const response = await fetch(item.content);
-                    const blob = await response.blob();
-                    audioCache[item.content] = URL.createObjectURL(blob);
-                } catch (e) {
-                    console.error("Failed to preload:", item.content, e);
-                }
-            }
-        }
-        console.log("All audios ready in memory! Starting loop...");
-        startLeonLoop(); 
-    }
-
-    // সবকিছু থামানো এবং রাগান্বিত মোড পরিষ্কার করার মাস্টার কন্ট্রোল
-    function stopEverything() {
-        const robot = document.querySelector(".robot");
-        const mouth = document.getElementById("mth");
-        
-        // ১. সব রাগান্বিত বা গুলী করার ক্লাস পরিষ্কার
-        if (robot) robot.classList.remove("angry", "look-left", "look-right");
-        
-        // ২. সব টাইমার এবং অডিও পরিষ্কার
-        if (window.leonTimer) clearTimeout(window.leonTimer);
-        
-        if (window.currentActiveAudio) {
-            window.currentActiveAudio.pause();
-            window.currentActiveAudio.currentTime = 0;
-            window.currentActiveAudio = null;
-        }
-
-        // ৩. মুখ নড়ানো বন্ধ করা
-        if(mouth) mouth.classList.remove("talking");
-        leonStatus = "idle";
-    }
-
-    // ২. বাস্তবসম্মত চোখের তাকানো (Saccades) নড়াচড়া করার টাইমার
-    function startRandomGazeLoop() {
-        // যদি লিয়ন কথা না বলে বা বিজি না থাকে
-        if (leonStatus !== "idle") return;
-
-        // দ্রুত নড়াচড়া করবে, তাই ১ থেকে ৩ সেকেন্ড পর পর ট্রাই করবে
-        let waitTime = Math.floor(Math.random() * 2000) + 1000;
-
-        window.gazeTimer = setTimeout(() => {
-            const robot = document.querySelector(".robot");
-            if (!robot) return;
-
-            // যদি সে অলরেডি রাগান্বিত বা গুলী করার মোডে থাকে, তবে তাকানোর নড়াচড়া করবে না
-            if (robot.classList.contains("angry") || robot.classList.contains("shoot-mode")) return;
-
-            // সাধারণ মোড থাকলে তাকানোর নড়াচড়া করবে
-            robot.classList.remove("look-left", "look-right"); // পরিষ্কার
-
-            let randomGaze = Math.random();
-            if (randomGaze < 0.3) {
-                robot.classList.add("look-left");
-            } else if (randomGaze > 0.7) {
-                robot.classList.add("look-right");
-            }
-            // সোজাসুজি তাকানো অবস্থায় automatically straight
-
-            // দ্রুত নড়াচড়া করার ২ সেকেন্ড পর আবার নড়াচড়া করবে কি না চেক করবে
-            setTimeout(startRandomGazeLoop, 2000); 
-
-        }, waitTime);
-    }
-
-    // আপনি যখন কথা বলবেন, তখন লিয়নের অটোমেটিক অডিও থামিয়ে দেওয়ার জন্য
-    function speak(text) {
-        stopEverything(); // পুরনো সব অডিও বন্ধ
-        
-        leonStatus = "speaking";
-        
-        const robot = document.querySelector(".robot");
-
-        // কন্ডিশন ১: চেক করুন এই টেক্সট কি "angry" লিস্টে আছে
-        if (angryTextDialogs.includes(text)) {
-            robot.classList.add("angry");
-        }
-
-        const mouth = document.getElementById("mth");
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'bn-BD';
-
-        // মুখ নড়ানো শুরু
-        utterance.onstart = () => {
-            if(mouth) mouth.classList.add("talking");
-        };
-
-        utterance.onend = () => {
-            stopEverything(); // Angry class, talking class সব পরিষ্কার
-            startLeonLoop();
-        };
-
-        window.speechSynthesis.speak(utterance);
-    }
 
     async function playAudioSmoothly(url) {
         stopEverything(); // পুরনো সব বন্ধ
@@ -612,7 +499,7 @@ let isProcessing = false;
         const robot = document.querySelector(".robot");
         leonStatus = "playing";
 
-        // কন্ডিশন ২: চেক করুন এই অডিওটি কি "angry" লিস্টে আছে
+        // কন্ডিশন ১: চেক করুন এই অডিওটি কি "angry" লিস্টে আছে
         if (angryAudioURLs.includes(url)) {
             robot.classList.add("angry");
         }
@@ -622,7 +509,7 @@ let isProcessing = false;
         
         window.currentActiveAudio.play().then(() => {
             const mouth = document.getElementById("mth");
-            if(mouth) mouth.classList.add("talking"); // মুখ নড়ানো শুরু
+            if(mouth) mouth.classList.add("talking");
         }).catch((e) => { 
             console.error("Audio play failed:", e);
             stopEverything(); 
@@ -630,7 +517,7 @@ let isProcessing = false;
         });
 
         window.currentActiveAudio.onended = function() {
-            stopEverything(); // talking class automatically removed
+            stopEverything(); // Class, Audio, Timer সব পরিষ্কার করবে
             startLeonLoop();
         };
 
@@ -655,7 +542,23 @@ let isProcessing = false;
                 let item = mixedDialogs[Math.floor(Math.random() * mixedDialogs.length)];
 
                 if (item.type === "text") {
+                    leonStatus = "speaking";
+                    
+                    const robot = document.querySelector(".robot");
+
+                    // কন্ডিশন ২: চেক করুন এই টেক্সট কি "angry" লিস্টে আছে
+                    if (angryTextDialogs.includes(item.content)) {
+                        robot.classList.add("angry");
+                    }
+
                     speak(item.content);
+
+                    // ডায়লগ শেষ হওয়ার পর ৭ সেকেন্ড সেফটি গ্যাপ (Angry Class automatically removed via speak function in step 4 below)
+                    setTimeout(() => { 
+                        stopEverything(); // Class clean
+                        startLeonLoop(); 
+                    }, 7000);
+
                 } else if (item.type === "audio") {
                     playAudioSmoothly(item.content);
                 }
@@ -665,43 +568,15 @@ let isProcessing = false;
         }, waitTime);
     }
 
-    // আপনি কথা বলা শুরু করলে লিয়নের অডিও থামিয়ে দেওয়ার লজিক
-    window.addEventListener('mousedown', function (e) {
-        stopEverything();
-    });
-
     // শুরুতে প্রি-লোড চালু
     preloadAudios();
-    function activateLeon() {
-    const btn = document.getElementById('startBtn');
-    if(btn) btn.style.display = 'none'; // বাটন লুকাবে
-    
-    const statusText = document.getElementById('status');
-    if(statusText) statusText.innerText = "লিয়ন আপনার কথা শুনছে...";
-    
-    speak("আসসালামু আলাইকুম রনি ভাই! আমি জেগেছি।"); // সালাম দিবে
-    
-    // অটোমেটিক ডায়লগ লুপ শুরু
-    if (typeof startLeonLoop === "function") {
-        startLeonLoop();
-    }
-}
-function startLeonLoop() {
-    let waitTime = Math.floor(Math.random() * 5000) + 5000; // ৫-১০ সেকেন্ড বিরতি
-    window.leonTimer = setTimeout(() => {
-        if (!isSpeaking && !isProcessing) {
-            let item = mixedDialogs[Math.floor(Math.random() * mixedDialogs.length)];
-            if (item.type === "text") speak(item.content);
-            else if (item.type === "audio") {
-                let a = new Audio(item.content);
-                a.play();
-                mth.classList.add('talking');
-                a.onended = () => mth.classList.remove('talking');
-            }
+
+    // সেফটি গিয়ার
+    window.leonSafety = setInterval(() => {
+        if (leonStatus === "idle" && !window.speechSynthesis.speaking && !isSpeaking && !isProcessing) {
+             startLeonLoop();
         }
-        startLeonLoop(); // লুপ চলতে থাকবে
-    }, waitTime);
-}
+    }, 30000);
 
 </script>
 </body>
