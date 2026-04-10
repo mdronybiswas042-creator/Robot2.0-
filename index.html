@@ -669,6 +669,24 @@
 
     // শুরুতে প্রি-লোড চালু
     preloadAudios();
+    // বাটন ক্লিক করলে লিওনকে জাগানোর ফাংশন
+    function activateLeon() {
+        // বাটনটি স্ক্রিন থেকে সরিয়ে দিবে
+        const btn = document.getElementById('startBtn');
+        if(btn) btn.style.display = 'none'; 
+        
+        // স্ট্যাটাস টেক্সট আপডেট করবে
+        const statusText = document.getElementById('status');
+        if(statusText) statusText.innerText = "লিয়ন জেগেছে!";
+        
+        // লিওন জেগে একটি সালাম দিবে
+        speak("আসসালামু আলাইকুম রনি ভাই! আমি জেগেছি।");
+        
+        // অটোমেটিক কথা বলার লুপ শুরু করবে
+        if (typeof startLeonLoop === "function") {
+            startLeonLoop();
+        }
+    }
 
 </script>
 </body>
