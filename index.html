@@ -113,6 +113,9 @@
     <button class="btn" id="startBtn" onclick="activateLeon()">লিওনকে জাগান</button>
 
     <script>
+        let isSpeaking = false;
+let isProcessing = false;
+
         const status = document.getElementById('status'), mth = document.getElementById('mth'), robot = document.getElementById('leonRobot');
         let isSpeaking = false, isProcessing = false, lastSpeakTime = 0, recognition;
 
@@ -669,24 +672,36 @@
 
     // শুরুতে প্রি-লোড চালু
     preloadAudios();
-    // বাটন ক্লিক করলে লিওনকে জাগানোর ফাংশন
     function activateLeon() {
-        // বাটনটি স্ক্রিন থেকে সরিয়ে দিবে
-        const btn = document.getElementById('startBtn');
-        if(btn) btn.style.display = 'none'; 
-        
-        // স্ট্যাটাস টেক্সট আপডেট করবে
-        const statusText = document.getElementById('status');
-        if(statusText) statusText.innerText = "লিয়ন জেগেছে!";
-        
-        // লিওন জেগে একটি সালাম দিবে
-        speak("আসসালামু আলাইকুম রনি ভাই।");
-        
-        // অটোমেটিক কথা বলার লুপ শুরু করবে
-        if (typeof startLeonLoop === "function") {
-            startLeonLoop();
-        }
+    const btn = document.getElementById('startBtn');
+    if(btn) btn.style.display = 'none'; // বাটন লুকাবে
+    
+    const statusText = document.getElementById('status');
+    if(statusText) statusText.innerText = "লিয়ন আপনার কথা শুনছে...";
+    
+    speak("আসসালামু আলাইকুম রনি ভাই! আমি জেগেছি।"); // সালাম দিবে
+    
+    // অটোমেটিক ডায়লগ লুপ শুরু
+    if (typeof startLeonLoop === "function") {
+        startLeonLoop();
     }
+}
+function startLeonLoop() {
+    let waitTime = Math.floor(Math.random() * 5000) + 5000; // ৫-১০ সেকেন্ড বিরতি
+    window.leonTimer = setTimeout(() => {
+        if (!isSpeaking && !isProcessing) {
+            let item = mixedDialogs[Math.floor(Math.random() * mixedDialogs.length)];
+            if (item.type === "text") speak(item.content);
+            else if (item.type === "audio") {
+                let a = new Audio(item.content);
+                a.play();
+                mth.classList.add('talking');
+                a.onended = () => mth.classList.remove('talking');
+            }
+        }
+        startLeonLoop(); // লুপ চলতে থাকবে
+    }, waitTime);
+}
 
 </script>
 </body>
