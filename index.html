@@ -11,44 +11,113 @@
         .robot { position: relative; width: 320px; height: 500px; display: flex; flex-direction: column; align-items: center; }
         .head { width: 210px; height: 185px; background: #fff; border: 5px solid var(--line); border-radius: 35px; position: relative; z-index: 2; transition: transform 0.2s ease; }
 
-        /* ২. চোখের গঠন ও বাস্তবসম্মত মুভমেন্ট (Fast & Sharp) */
-        .eyes { display: flex; justify-content: space-around; width: 100%; margin-top: 55px; padding: 0 30px; round: border-round; }
-        .eye { width: 45px; height: 45px; background: #1a1a1a; border-radius: 12px; position: relative; overflow: hidden; border: 2px solid #fff; transition: transform 0.1s cubic-bezier(0.45, 0.05, 0.55, 0.95); }
+                /* চোখের পালক এবং নড়াচড়ার বাস্তবভিত্তিক CSS (Fast Movement) */
+        .eyes {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-top: 55px;
+            padding: 0 30px;
+            box-sizing: border-box;
+            position: relative;
+        }
 
-        /* চোখের পাতা (Eyelid) - উপর থেকে নিচে নামবে */
-        .eye::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 0; background: #fff; z-index: 2; animation: lidBlink 4s infinite; }
-        @keyframes lidBlink { 0%, 96%, 100% { height: 0; } 98% { height: 100%; } }
+        .eye {
+            width: 45px;
+            height: 45px;
+            background: #1a1a1a;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid #fff;
+            box-sizing: border-box;
+            
+            /* দ্রুত নড়াচড়ার জন্য transition (cubic-bezier বাস্তবসম্মত ত্বরণ দেয়) */
+            transition: transform 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        /* চোখের পাতা (Eyelid) - উপর থেকে নিচে কাভার করবে */
+        .eye::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 0;
+            background: #fff;
+            z-index: 2;
+            
+            /* স্বাভাবিক চোখের পালক ফেলার CSS-only অ্যানিমেশন (সব সময় চলবে) */
+            animation: lidBlink 3.8s infinite cubic-bezier(0.5, 0, 0.75, 0);
+            border-radius: 0 0 10px 10px; /* যাতে একটু কার্ভ হয় */
+        }
+
+        /* বাস্তবভিত্তিক চোখের পালক ফেলার keyframes */
+        @keyframes lidBlink {
+            0%, 96%, 100% { height: 0; }
+            98% { height: 100%; } /* দ্রুত বন্ধ হওয়া */
+        }
 
         /* চোখের মণি (Pupil) */
-        .eye::after { content: ''; position: absolute; width: 12px; height: 12px; background: #fff; border-radius: 50%; top: 6px; left: 5px; z-index: 1; transition: transform 0.1s ease-out; }
+        .eye::after {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #fff;
+            border-radius: 50%;
+            top: 6px;
+            left: 5px; /* স্বাভাবিক পজিশন */
+            z-index: 1;
+            box-shadow: inset -2px -2px 0 #ddd;
+            
+            /* মণি নড়াচড়ার দ্রুত গতি */
+            transition: transform 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
 
-        /* ৩. বিশেষ এনিমেশন ও মুভমেন্ট স্টেট */
-        .robot.look-right .eye { transform: translateX(5px); }
-        .robot.look-right .eye::after { transform: translateX(10px); }
-        .robot.look-left .eye { transform: translateX(-5px); }
-        .robot.look-left .eye::after { transform: translateX(-10px); }
+        /* ==== special states managed by JS classes applied to .robot ==== */
 
-        /* রাগান্বিত চোখ (Angry - ৩ নম্বর ছবির মতো) */
-        .robot.angry .eye::before { animation: none !important; height: 45%; background: #ff5e3a; transform: translateY(-2px); border-radius: 0 0 10px 10px; }
-        .robot.angry .eye::after { top: auto; bottom: 4px; transform: scaleY(0.7); }
+        /* ১. সাধারণ তাকানো - লুপের সময় randomly trigger হবে */
+        
+        /* ডানে তাকানো */
+        .robot.look-right .eye { transform: translateX(4px); }
+        .robot.look-right .eye::after { transform: translateX(8px); }
 
-        /* ৪. মুখ ও কথা বলার এনিমেশন */
-        .mouth { width: 45px; height: 6px; background: var(--line); margin-top: 35px; margin-left: auto; margin-right: auto; border-radius: 10px; transition: 0.3s; }
-        .talking .mouth { animation: mouthMove 0.18s infinite alternate; }
-        @keyframes mouthMove { 0% { height: 6px; } 100% { height: 20px; } }
+        /* বামে তাকানো */
+        .robot.look-left .eye { transform: translateX(-4px); }
+        .robot.look-left .eye::after { transform: translateX(-8px); }
 
-        /* ৫. বডি ও হাত */
-        .body-container { width: 155px; height: 175px; background: #fff; border: 5px solid var(--line); border-radius: 45px; margin-top: -10px; position: relative; }
-        .arm { position: absolute; top: 25px; width: 26px; height: 115px; background: #fff; border: 4px solid var(--line); border-radius: 20px; }
-        .left { left: -42px; transform: rotate(18deg); }
-        .right { right: -42px; transform: rotate(-18deg); }
-        .shoot-mode .right { transform: rotate(-90deg); animation: recoil 0.1s infinite; }
-        @keyframes recoil { 0% { transform: rotate(-90deg) translateX(0); } 50% { transform: rotate(-90deg) translateX(-10px); } }
+        /* ২. রাগান্বিত চোখ (Angry Eyes) - image 14 এর ৩ নম্বর ছবি */
+        /* যখন .angry ক্লাস `.robot` এ থাকবে */
+        .robot.angry .eye::before {
+            animation: none !important; /* normal blink বন্ধ */
+            height: 45%; /* চোখের পাতা অর্ধেক নামানো */
+            background: #ff5e3a; /* লালচে পাতা */
+            transform: rotate(15px) translateY(-5px); /* বাঁকানো ভ্রু */
+            border-radius: 0 0 12px 12px;
+        }
 
-        /* ৬. স্ট্যাটাস ও বাটন */
-        #status { font-weight: 600; margin-top: 40px; color: #444; height: 35px; text-align: center; }
-        .btn { background: var(--line); color: #fff; border: none; padding: 15px 45px; border-radius: 50px; cursor: pointer; transition: 0.2s; }
-        .btn:hover { opacity: 0.9; transform: translateY(-2px); }
+        /* রাগান্বিত চোখের মণি */
+        .robot.angry .eye::after {
+            top: auto;
+            bottom: 3px;
+            transform: scaleY(0.6);
+        }
+
+        /* ৩. গুলী করার সময় Eyes */
+        .robot.shoot-mode .eye::before {
+            animation: none !important;
+            height: 45%;
+            background: red;
+            transform: rotate(-15px) translateY(-5px);
+        }
+        
+        .robot.shoot-mode .eye::after {
+            display: none; /* মণি উধাও */
+        }
+
+        /* পুরনো eyeSquint এবং movePupil এর keyframes পুরোপুরি বাদ */
+
 
 
     </style>
